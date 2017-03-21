@@ -1,3 +1,4 @@
+import numpy as np
 class vertex(object):
     
     def __init__(self, px, py, identifier):
@@ -14,6 +15,19 @@ class vertex(object):
 
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
+    
+    def isConvex(self):
+        prev = self.incidentEdge.previous.origin
+        post = self.incidentEdge.next.origin
+
+        v1 = np.array([self.x - prev.x, self.y - prev.y])
+        v2 = np.array([post.x - self.x, post.y - self.y])
+
+        if (np.cross(v1, v2) == -1) :
+            return True
+        return False
+        
+        
 
 
 class hedge(object):
@@ -224,18 +238,30 @@ class DCEL(object):
     def horizontalSweep(self):
         for i in self.hedgeHorizontalList:
             print("Searching ", i.origin, i.next.origin)
-            #search left
+            #search "left"
+            if (i.origin.isConvex()):
+                j = i.twin.next
+                direction = -1 if (j.next.origin.y - i.origin.y > 0) else 1
+                # 1 if the desired edge is "above" the original y value
+                # -1 otherwise
+                while(True):
+                    if (j.next.origin.y > direction * i.origin.y):
+                        print("Intersect between", i.origin, i.next.origin, " and ", j.origin, j.next.origin)
+                        break
+                    elif (j.next.origin.y == i.origin.y):
+                        print("Colinear edge found")
+                    j = j.next.next
+            #search "right"
+            if (i.next.origin.isConvex()):
+                j = i.next
+                direction = -1 if (j.next.origin.y - i.origin.y > 0) else 1
+                while(True):
+                    if (j.next.origin.y > direction * i.origin.y):
+                        print("Intersect between", i.origin, i.next.origin, " and ", j.origin, j.next.origin)
+                        break
+                    elif (j.next.origin.y == i.origin.y):
+                        print("Colinear edge found")
+                    j = j.next.next
             
-            #search right
-            
-            j = i.next
-            #nao gera new hedge se quer a aresta quer a twin forem para a mesma direcao ?
-            #case when horizontal edge turns up right away
-            if (j.next.origin.y > i.origin.y):
-                break
-            while(j is not i):
-                if (j.next.origin.y > i.origin.y):
-                    print("Intersect between", i.origin, i.next.origin, " and ", j.origin, j.next.origin)
-                    break
-                j = j.next
+                    
             
