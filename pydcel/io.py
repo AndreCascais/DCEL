@@ -119,7 +119,7 @@ def datadict2dcel(datadict):
 
     D.separateHedges()
     D.orderHedges()
-    D.horizontalSweep()
+    #D.horizontalSweep()
     return D
 
 

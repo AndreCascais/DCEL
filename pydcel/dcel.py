@@ -6,6 +6,7 @@ class vertex(object):
         self.x = px
         self.y = py
         self.incidentEdge = None
+        self.isReflex = False
         
     def setTopology(self, newIncedentEdge):
         self.incidentEdge = newIncedentEdge
@@ -16,7 +17,7 @@ class vertex(object):
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
     
-    def isConvex(self):
+    def checkReflex(self):
         prev = self.incidentEdge.previous.origin
         post = self.incidentEdge.next.origin
 
@@ -24,11 +25,9 @@ class vertex(object):
         v2 = np.array([post.x - self.x, post.y - self.y])
 
         if (np.cross(v1, v2) == -1) :
-            return True
-        return False
-        
-        
-
+            self.isReflex = True
+        else:
+            self.isReflex = False
 
 class hedge(object):
     
@@ -236,32 +235,37 @@ class DCEL(object):
         self.hedgeHorizontalList = sorted(self.hedgeHorizontalList, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
         
     def horizontalSweep(self):
-        for i in self.hedgeHorizontalList:
-            print("Searching ", i.origin, i.next.origin)
-            #search "left"
-            if (i.origin.isConvex()):
-                j = i.twin.next
-                direction = -1 if (j.next.origin.y - i.origin.y > 0) else 1
-                # 1 if the desired edge is "above" the original y value
-                # -1 otherwise
-                while(True):
-                    if (j.next.origin.y > direction * i.origin.y):
-                        print("Intersect between", i.origin, i.next.origin, " and ", j.origin, j.next.origin)
-                        break
-                    elif (j.next.origin.y == i.origin.y):
-                        print("Colinear edge found")
-                    j = j.next.next
-            #search "right"
-            if (i.next.origin.isConvex()):
-                j = i.next
-                direction = -1 if (j.next.origin.y - i.origin.y > 0) else 1
-                while(True):
-                    if (j.next.origin.y > direction * i.origin.y):
-                        print("Intersect between", i.origin, i.next.origin, " and ", j.origin, j.next.origin)
-                        break
-                    elif (j.next.origin.y == i.origin.y):
-                        print("Colinear edge found")
-                    j = j.next.next
+
+        for i in self.vertexList:
+            i.checkReflex()
             
+        intersectList = []
+
+        for i in self.hedgeHorizontalList:
+            #search "left"
+            if (i.origin.isReflex):
+                j = i.twin.next
+                intersectList.append(getHorizontalIntersection(i, j))
+            #search "right"
+            if (i.next.origin.isReflex):
+                j = i.next
+                intersectList.append(getHorizontalIntersection(i, j))
+                
+def getHorizontalIntersection(edge, nextEdge):
+            
+    direction = False if (nextEdge.next.origin.y - edge.origin.y > 0) else True
+    # True if the desired edge is "above" the original y value
+    # False otherwise
+    while(True):
+        if (nextEdge.next.origin.y == edge.origin.y):
+            print("Colinear edge found")
+            nextEdge.next.origin.isReflex = False
+            return (edge, nextEdge)
+        else:
+            cond = nextEdge.next.origin.y > edge.origin.y
+            if ((cond and direction) or (not cond and not direction)):
+                print("Intersect between", edge.origin, edge.next.origin, " and ", nextEdge.origin, nextEdge.next.origin)
+                return (edge, nextEdge)
+            nextEdge = nextEdge.next.next
                     
             

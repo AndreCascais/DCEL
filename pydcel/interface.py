@@ -185,7 +185,7 @@ class dcelVis(Tk):
         self.highlight_cache = [i1,i2,i3,i4,i5,i6]
 
     def explain_vertex(self, v):
-        print v, v.isConvex()
+        print v
         
         self.draw.deleteItems(self.highlight_cache)
 
