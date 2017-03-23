@@ -1,4 +1,7 @@
 import numpy as np
+import bisect
+from bintrees import AVLTree
+
 class vertex(object):
     
     def __init__(self, px, py, identifier):
@@ -75,6 +78,7 @@ class hedge(object):
             return 'd'
         elif (self.origin.y < self.next.origin.y):
             return 'u'
+
 
 
 class face(object):
@@ -242,24 +246,13 @@ class DCEL(object):
     def horizontalSweep(self):
         for i in self.vertexList:
             i.checkReflex()
-        sweepingLine = []
+        sweepingLine = AVLTree()
         
         for i in self.eventList:
             print ("Checking ", i)
             myDir = i.getDirection()
             prevDir = i.previous.getDirection()
-            # start
-            if myDir == 'd':
-                # direction da sweeping line -> add vertex
-                sweepingLine.append(i)
-            elif prevDir == 'u':
-                sweepingLine.append(i.previous)
-                
-            # close
-            if myDir == 'u':
-                sweepingLine.remove(i)
-            elif prevDir == 'd':
-                sweepingLine.remove(i.previous)
+            
             # expand
             if i.origin.isReflex:
                 possibleDirs = ['l', 'r']
@@ -267,19 +260,54 @@ class DCEL(object):
                     possibleDirs.remove('l')
                 if myDir == 'r' or prevDir == 'l':
                     possibleDirs.remove('r')
-                print("Can try to expand to : ", possibleDirs)
-            print ("Sweeping is now ", sweepingLine)
-                    
                     
                 #esquerda -> edge tem de descer
                 #direita -> edge tem de subir
-
-            
-            
                 
-            
-            
-            
+                if 'l' in possibleDirs:
+                    leftHedge = sweepingLine.floor_item(i.origin.x)[1]
+                    print ("Will try to go to left ", leftHedge)
+                    if (leftHedge.getDirection() == 'd'):
+                        print ("Sucess")
+                        
+                if 'r' in possibleDirs:
+                    rightHedge = sweepingLine.ceiling_item(i.origin.x)[1]
+                    print ("Will try to go right ", rightHedge)
+                    if (rightHedge.getDirection() == 'u'):
+                        print ("Sucess")
+                    
+                print("Can try to expand to : ", possibleDirs)
+            # start
+            if myDir == 'd':
+                # direction da sweeping line -> add vertex 
+                sweepingLine.insert(i.origin.x, i)
+            elif prevDir == 'u':
+                sweepingLine.insert(i.previous.origin.x, i.previous)
+                
+            # close
+            if myDir == 'u':
+                sweepingLine.remove(i.origin.x)
+            elif prevDir == 'd':
+                sweepingLine.remove(i.previous.origin.x)
+            print ("Sweeping is now ", sweepingLine)
+                    
+                    
+
+
+class compHedge:
+    def __init__(self, hedge, key):
+        self.hedge = hedge
+        self.key = key
+    def __lt_(self, hedge2):
+        print("lt", self, hedge2, " < ", self.key < hedge2.key)
+        return self.key < hedge2.key
+    def __eq__(self, hedge2):
+        print("eq", self, hedge2, " = ", self.key == hedge2.key)
+        return self.key == hedge2.key
+    def __repr__(self):
+        return self.hedge.__repr__()
+        
+                
 def orderSweep(l):
     l = sorted(l, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
     return l
