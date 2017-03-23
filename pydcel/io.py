@@ -1,5 +1,4 @@
 from dcel import vertex, hedge, face, DCEL
-from writegrid2ply import writegrid2ply
 
 
 def ply2datadict(infile):
