@@ -24,7 +24,8 @@ class vertex(object):
         v1 = np.array([self.x - prev.x, self.y - prev.y])
         v2 = np.array([post.x - self.x, post.y - self.y])
 
-        if (np.cross(v1, v2) == -1) :
+        # reflex, same line, same line
+        if (np.cross(v1, v2) == -1 or v1[0] == v2[0]) :
             self.isReflex = True
         else:
             self.isReflex = False
@@ -65,6 +66,16 @@ class hedge(object):
     def __repr__(self):
         return "he{}".format(self.identifier)
 
+    def getDirection(self):
+        if (self.origin.x > self.next.origin.x):
+            return 'l'
+        elif (self.origin.x < self.next.origin.x):
+            return 'r'
+        elif (self.origin.y > self.next.origin.y):
+            return 'd'
+        elif (self.origin.y < self.next.origin.y):
+            return 'u'
+
 
 class face(object):
     
@@ -93,8 +104,7 @@ class DCEL(object):
         self.hedgeList = []
         self.faceList = []
         self.infiniteFace = None
-        self.hedgeHorizontalList = []
-        self.hedgeVerticalList = []
+        self.eventList = []
 
     def getNewId(self, L):
         if len(L) == 0:
@@ -224,48 +234,52 @@ class DCEL(object):
         #separates vertical and horizontal edges
         #the ones chosen didnt had the incident face being inf
         for i in self.hedgeList:
-            print i.incidentFace
-            if (i.origin.y == i.next.origin.y and i.incidentFace.identifier  != "i"):
-                self.hedgeHorizontalList.append(i)
-            elif (i.incidentFace.identifier  != "i"):
-                self.hedgeVerticalList.append(i)
-
-    def orderHedges(self):
-        # Only trying to do horizontal for now
-        self.hedgeHorizontalList = sorted(self.hedgeHorizontalList, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
+            if (i.incidentFace.identifier  != "i"):
+                self.eventList.append(i)
+        self.eventList = sorted(self.eventList, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
+        
         
     def horizontalSweep(self):
-
         for i in self.vertexList:
             i.checkReflex()
-            
-        intersectList = []
-
-        for i in self.hedgeHorizontalList:
-            #search "left"
-            if (i.origin.isReflex):
-                j = i.twin.next
-                intersectList.append(getHorizontalIntersection(i, j))
-            #search "right"
-            if (i.next.origin.isReflex):
-                j = i.next
-                intersectList.append(getHorizontalIntersection(i, j))
+        sweepingLine = []
+        
+        for i in self.eventList:
+            print ("Checking ", i)
+            myDir = i.getDirection()
+            prevDir = i.previous.getDirection()
+            # start
+            if myDir == 'd':
+                # direction da sweeping line -> add vertex
+                sweepingLine.append(i)
+            elif prevDir == 'u':
+                sweepingLine.append(i.previous)
                 
-def getHorizontalIntersection(edge, nextEdge):
-            
-    direction = False if (nextEdge.next.origin.y - edge.origin.y > 0) else True
-    # True if the desired edge is "above" the original y value
-    # False otherwise
-    while(True):
-        if (nextEdge.next.origin.y == edge.origin.y):
-            print("Colinear edge found")
-            nextEdge.next.origin.isReflex = False
-            return (edge, nextEdge)
-        else:
-            cond = nextEdge.next.origin.y > edge.origin.y
-            if ((cond and direction) or (not cond and not direction)):
-                print("Intersect between", edge.origin, edge.next.origin, " and ", nextEdge.origin, nextEdge.next.origin)
-                return (edge, nextEdge)
-            nextEdge = nextEdge.next.next
+            # close
+            if myDir == 'u':
+                sweepingLine.remove(i)
+            elif prevDir == 'd':
+                sweepingLine.remove(i.previous)
+            # expand
+            if i.origin.isReflex:
+                possibleDirs = ['l', 'r']
+                if myDir == 'l' or prevDir == 'r':
+                    possibleDirs.remove('l')
+                if myDir == 'r' or prevDir == 'l':
+                    possibleDirs.remove('r')
+                print("Can try to expand to : ", possibleDirs)
+            print ("Sweeping is now ", sweepingLine)
                     
+                    
+                #esquerda -> edge tem de descer
+                #direita -> edge tem de subir
+
             
+            
+                
+            
+            
+            
+def orderSweep(l):
+    l = sorted(l, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
+    return l

@@ -118,8 +118,7 @@ def datadict2dcel(datadict):
         last_correct_edge = current_edge
 
     D.separateHedges()
-    D.orderHedges()
-    #D.horizontalSweep()
+    D.horizontalSweep()
     return D
 
 
