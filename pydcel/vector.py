@@ -1,4 +1,4 @@
-from math import hypot, sqrt
+from math import hypot
 
 
 class vec2(object):
@@ -9,8 +9,8 @@ class vec2(object):
 
     def normalize(self):
         l = hypot(self.x, self.y)
-        self.x = self.x / l
-        self.y = self.y / l
+        self.x /= l
+        self.y /= l
 
     def normalized(self):
         l = hypot(self.x, self.y)

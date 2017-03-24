@@ -1,5 +1,4 @@
-from dcel import vertex, hedge, face, DCEL
-
+from .dcel import vertex, hedge, face, DCEL
 
 def ply2datadict(infile):
     """collect vertex coordinates and normals from input file"""
@@ -15,7 +14,7 @@ def ply2datadict(infile):
 
         datadict['coords'] = []
 
-        for i in xrange(int(vertexcount)):
+        for i in range(int(vertexcount)):
             line = f.readline()
             x, y = line.split()
             datadict['coords'].append([float(x), float(y)])
@@ -33,7 +32,7 @@ def datadict2dcel(datadict):
     vertices = {}  # v_id: (e0,...,en) i.e. the edges originating from this v
 
     m = len(datadict['coords'])
-    for i in xrange(m):
+    for i in range(m):
         vertices[i] = []
 
     # find all halfedges, keep track of their vertices and faces
@@ -42,7 +41,7 @@ def datadict2dcel(datadict):
         # face.reverse()
         n_vertices = len(face)
 
-        for v_i in xrange(n_vertices):
+        for v_i in range(n_vertices):
             # store reference to this hedge in vertex list
             vertices[face[v_i]].append(j)
 
@@ -71,7 +70,7 @@ def datadict2dcel(datadict):
     infinite_face = D.createInfFace()
 
     # create all edges except for the ones incident to the infinite face
-    for e in xrange(len(hedges)):
+    for e in range(len(hedges)):
         D.createHedge()
 
     inf_edge = None
@@ -105,7 +104,7 @@ def datadict2dcel(datadict):
     infinite_face.innerComponent = inf_edge
     current_edge = last_correct_edge = inf_edge
 
-    while inf_edge.previous == None:
+    while inf_edge.previous is None:
 
         current_edge = last_correct_edge
         while current_edge.twin.incidentFace != infinite_face:
