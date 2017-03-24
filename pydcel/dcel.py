@@ -1,6 +1,9 @@
+from __future__ import print_function
 import numpy as np
-import bisect
 from bintrees import AVLTree
+
+from collections import namedtuple
+Point = namedtuple('Point', ['x', 'y'])
 
 class vertex(object):
     
@@ -101,6 +104,12 @@ class face(object):
         return "f{}".format(self.identifier)
 
 
+def findIntersection(horizontal,vertical):
+    x = vertical.origin.x
+    y = horizontal.origin.y
+    return Point(x,y)
+
+
 class DCEL(object):
     
     def __init__(self):
@@ -152,7 +161,7 @@ class DCEL(object):
             self.faceList.remove(element)
             del element
         else:
-            print "illegal element type"
+            print("illegal element type")
 
     def __repr__(self):
         s = ""
@@ -167,8 +176,7 @@ class DCEL(object):
     def checkEdgeTwins(self):
         for e in self.hedgeList:
             if not e == e.twin.twin:
-                print "this edge has a problem with its twin:",
-                print e
+                print("this edge has a problem with its twin:",e)
 
     def remove_vertex(self, vertex):
         """Experimental!"""
@@ -182,19 +190,19 @@ class DCEL(object):
         # we don't want to come near the infiniteFace
         for e in e_0.wind():
             # raw_input()
-            print e, e.twin, e.incidentFace
+            print(e, e.twin, e.incidentFace)
             if e.incidentFace == self.infiniteFace:
-                print "refusing to remove vertex incident to infiniteFace..."
+                print("refusing to remove vertex incident to infiniteFace...")
                 return
 
         # we also don't want to create any dangling edges
         for e in e_0.wind():
             if e.previous == e.twin.next.twin:
-                print "refusing to remove this vertex because it will create dangling edge(s)"
+                print("refusing to remove this vertex because it will create dangling edge(s)")
                 return
             for e_neighbor in e.next.wind():
                 if e_neighbor.previous == e_neighbor.twin.next.twin:
-                    print "refusing to remove this vertex because it might cause dangling edge(s) in future"
+                    print("refusing to remove this vertex because it might cause dangling edge(s) in future")
                     return
 
         # FIXME: what to do if we are about to create a hole...?
@@ -235,8 +243,10 @@ class DCEL(object):
             self.remove(element)
             
     def separateHedges(self):
-        #separates vertical and horizontal edges
-        #the ones chosen didnt had the incident face being inf
+        """
+        separates vertical and horizontal edges
+        the ones chosen didnt had the incident face being inf
+        """
         for i in self.hedgeList:
             if (i.incidentFace.identifier  != "i"):
                 self.eventList.append(i)
@@ -244,70 +254,95 @@ class DCEL(object):
         
         
     def horizontalSweep(self):
-        for i in self.vertexList:
-            i.checkReflex()
+        for vertex in self.vertexList:
+            vertex.checkReflex()
         sweepingLine = AVLTree()
         
-        for i in self.eventList:
-            print ("Checking ", i)
-            myDir = i.getDirection()
-            prevDir = i.previous.getDirection()
+        for hedge in self.eventList:
+            print ("Checking ", hedge)
+            myDir = hedge.getDirection()
+            prevDir = hedge.previous.getDirection()
             
             # expand
-            if i.origin.isReflex:
+            if hedge.origin.isReflex:
                 possibleDirs = ['l', 'r']
                 if myDir == 'l' or prevDir == 'r':
                     possibleDirs.remove('l')
                 if myDir == 'r' or prevDir == 'l':
                     possibleDirs.remove('r')
                     
-                #esquerda -> edge tem de descer
-                #direita -> edge tem de subir
+                # esquerda -> edge tem de descer
+                # direita -> edge tem de subir
                 
                 if 'l' in possibleDirs:
-                    leftHedge = sweepingLine.floor_item(i.origin.x)[1]
+                    leftHedge = sweepingLine.floor_item(hedge.origin.x)[1]
                     print ("Will try to go to left ", leftHedge)
                     if (leftHedge.getDirection() == 'd'):
                         print ("Sucess")
-                        
+
+                        coords = findIntersection(hedge,leftHedge)
+                        old_vert = hedge.origin
+                        new_vert = self.createVertex(coords.x, coords.y)
+
+                        new_hedge = self.createHedge()
+                        twin_for_new_hedge = self.createHedge()
+                        new_hedge.setTopology(new_vert, twin_for_new_hedge, None, hedge, leftHedge)
+                        twin_for_new_hedge.setTopology(old_vert, new_hedge, None, leftHedge.twin,hedge.twin)
+
+                        hedge.next.previous = new_hedge
+                        new_vert.incidentEdge = new_hedge
+
                 if 'r' in possibleDirs:
-                    rightHedge = sweepingLine.ceiling_item(i.origin.x)[1]
+                    rightHedge = sweepingLine.ceiling_item(hedge.origin.x)[1]
                     print ("Will try to go right ", rightHedge)
                     if (rightHedge.getDirection() == 'u'):
                         print ("Sucess")
+
+                        coords = findIntersection(hedge, rightHedge)
+                        old_vert = hedge.origin
+                        new_vert = self.createVertex(coords.x, coords.y)
+
+                        new_hedge = self.createHedge()
+                        twin_for_new_hedge = self.createHedge()
+                        new_hedge.setTopology(new_vert, twin_for_new_hedge, None, hedge, rightHedge)
+                        twin_for_new_hedge.setTopology(old_vert, new_hedge, None, rightHedge.twin, hedge.twin)
+
+                        hedge.next.previous = new_hedge
+                        new_vert.incidentEdge = new_hedge
                     
                 print("Can try to expand to : ", possibleDirs)
+
             # start
             if myDir == 'd':
                 # direction da sweeping line -> add vertex 
-                sweepingLine.insert(i.origin.x, i)
+                sweepingLine.insert(hedge.origin.x, hedge)
             elif prevDir == 'u':
-                sweepingLine.insert(i.previous.origin.x, i.previous)
+                sweepingLine.insert(hedge.previous.origin.x, hedge.previous)
                 
             # close
             if myDir == 'u':
-                sweepingLine.remove(i.origin.x)
+                sweepingLine.remove(hedge.origin.x)
             elif prevDir == 'd':
-                sweepingLine.remove(i.previous.origin.x)
+                sweepingLine.remove(hedge.previous.origin.x)
             print ("Sweeping is now ", sweepingLine)
                     
                     
 
 
-class compHedge:
-    def __init__(self, hedge, key):
-        self.hedge = hedge
-        self.key = key
-    def __lt_(self, hedge2):
-        print("lt", self, hedge2, " < ", self.key < hedge2.key)
-        return self.key < hedge2.key
-    def __eq__(self, hedge2):
-        print("eq", self, hedge2, " = ", self.key == hedge2.key)
-        return self.key == hedge2.key
-    def __repr__(self):
-        return self.hedge.__repr__()
-        
-                
-def orderSweep(l):
-    l = sorted(l, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
-    return l
+# class compHedge:
+#     def __init__(self, hedge, key):
+#         self.hedge = hedge
+#         self.key = key
+#     def __lt_(self, hedge2):
+#         print("lt", self, hedge2, " < ", self.key < hedge2.key)
+#         return self.key < hedge2.key
+#     def __eq__(self, hedge2):
+#         print("eq", self, hedge2, " = ", self.key == hedge2.key)
+#         return self.key == hedge2.key
+#     def __repr__(self):
+#         return self.hedge.__repr__()
+#
+#
+# def orderSweep(l):
+#     l = sorted(l, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
+#     return l
