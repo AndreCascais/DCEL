@@ -177,70 +177,6 @@ class DCEL(object):
         for e in self.hedgeList:
             if not e == e.twin.twin:
                 print("this edge has a problem with its twin:",e)
-
-    def remove_vertex(self, vertex):
-        """Experimental!"""
-        # remove this vertex from the DCEL and keep the topo right. Assumes no dangling edges.
-        e_0 = vertex.incidentEdge
-        # print "removing ",
-        # print vertex
-        # print "with incidentEdge",
-        # print e_0
-        
-        # we don't want to come near the infiniteFace
-        for e in e_0.wind():
-            # raw_input()
-            print(e, e.twin, e.incidentFace)
-            if e.incidentFace == self.infiniteFace:
-                print("refusing to remove vertex incident to infiniteFace...")
-                return
-
-        # we also don't want to create any dangling edges
-        for e in e_0.wind():
-            if e.previous == e.twin.next.twin:
-                print("refusing to remove this vertex because it will create dangling edge(s)")
-                return
-            for e_neighbor in e.next.wind():
-                if e_neighbor.previous == e_neighbor.twin.next.twin:
-                    print("refusing to remove this vertex because it might cause dangling edge(s) in future")
-                    return
-
-        # FIXME: what to do if we are about to create a hole...?
-        
-        #This face we like so we keep it.
-        nice_face = e_0.incidentFace
-        
-        toRemove = [vertex]
-
-        current_edge = e_0.twin
-        if current_edge.incidentFace != nice_face:
-            toRemove.append(current_edge.incidentFace)
-        # update all face references to nice face
-        while current_edge != e_0.previous:
-            # loop backwards over face that must be removed and set incidentface fields to nice face
-            while current_edge.origin != vertex:
-                current_edge = current_edge.previous
-                # if current_edge == None: return
-                current_edge.incidentFace = nice_face
-
-            current_edge = current_edge.twin
-            # this face must be gone
-            if current_edge.incidentFace != nice_face:
-                toRemove.append(current_edge.incidentFace)
-
-        # update prev and next fields
-        edges = [e for e in e_0.wind()]
-        for e in edges:
-            e.next.previous = e.twin.previous
-            e.twin.previous.next = e.next
-            e.twin.origin.incidentEdge = e.next
-            toRemove.append(e)
-            toRemove.append(e.twin)
-
-        # now we can finally get rid of this stuff
-        nice_face.outerComponent = e_0.next
-        for element in toRemove:
-            self.remove(element)
             
     def separateHedges(self):
         """
@@ -259,7 +195,6 @@ class DCEL(object):
         sweepingLine = AVLTree()
         
         for hedge in self.eventList:
-            print ("Checking ", hedge)
             myDir = hedge.getDirection()
             prevDir = hedge.previous.getDirection()
             
@@ -275,42 +210,83 @@ class DCEL(object):
                 # direita -> edge tem de subir
                 
                 if 'l' in possibleDirs:
-                    leftHedge = sweepingLine.floor_item(hedge.origin.x)[1]
-                    print ("Will try to go to left ", leftHedge)
+                    leftHedge = sweepingLine.floor_item(hedge.origin.x - 1)[1]
                     if (leftHedge.getDirection() == 'd'):
-                        print ("Sucess")
 
                         coords = findIntersection(hedge,leftHedge)
                         old_vert = hedge.origin
                         new_vert = self.createVertex(coords.x, coords.y)
+                        
+                        # Break incident edge in two
+                        new_v_hedge = self.createHedge()
+                        new_v_twin_hedge = self.createHedge()
 
+                        new_vert.incidentEdge = leftHedge
+
+                        new_v_hedge.setTopology(leftHedge.origin, new_v_twin_hedge, leftHedge.incidentFace, leftHedge, leftHedge.previous)
+                        new_v_hedge.origin.incidentEdge = new_v_hedge
+                        new_v_twin_hedge.setTopology(new_vert, new_v_hedge, leftHedge.twin.incidentFace, leftHedge.twin.next, leftHedge.twin.previous)
+    
+                        leftHedge.origin = new_vert
+
+                        leftHedge.previous.next = new_v_hedge
+                        leftHedge.previous = new_v_hedge
+
+                        leftHedge.twin.next.previous = new_v_twin_hedge
+                        leftHedge.twin.next = new_v_twin_hedge
+                    
+                        # Join new hedge
+                        
                         new_hedge = self.createHedge()
                         twin_for_new_hedge = self.createHedge()
-                        new_hedge.setTopology(new_vert, twin_for_new_hedge, None, hedge, leftHedge)
-                        twin_for_new_hedge.setTopology(old_vert, new_hedge, None, leftHedge.twin,hedge.twin)
 
+                        new_hedge.setTopology(new_vert, twin_for_new_hedge, hedge.incidentFace, hedge, new_v_hedge)
+                        twin_for_new_hedge.setTopology(old_vert, new_hedge, hedge.incidentFace, leftHedge, hedge.twin.next.twin)
+
+                        # Isto esta mal
                         hedge.next.previous = new_hedge
-                        new_vert.incidentEdge = new_hedge
+                        hedge.next = new_hedge.twin
+                        
 
                 if 'r' in possibleDirs:
-                    rightHedge = sweepingLine.ceiling_item(hedge.origin.x)[1]
-                    print ("Will try to go right ", rightHedge)
+                    rightHedge = sweepingLine.ceiling_item(hedge.origin.x + 1)[1]
                     if (rightHedge.getDirection() == 'u'):
-                        print ("Sucess")
 
                         coords = findIntersection(hedge, rightHedge)
                         old_vert = hedge.origin
                         new_vert = self.createVertex(coords.x, coords.y)
+                        
+                        # Break incident edge in two
+                        new_v_hedge = self.createHedge()
+                        new_v_twin_hedge = self.createHedge()
 
+                        new_vert.incidentEdge = new_v_hedge
+                        
+                        new_v_hedge.setTopology(new_vert, new_v_twin_hedge, rightHedge.incidentFace, rightHedge.next, rightHedge)
+
+                        new_v_twin_hedge.setTopology(rightHedge.twin.origin, new_v_hedge, rightHedge.twin.incidentFace, rightHedge.twin, rightHedge.twin.previous)
+    
+                        rightHedge.twin.origin = new_vert
+
+                        rightHedge.next.previous = new_v_hedge
+                        rightHedge.next = new_v_hedge
+
+                        rightHedge.twin.previous.next = new_v_twin_hedge
+                        rightHedge.twin.previous = new_v_twin_hedge
+                    
+                        # Join new hedge
+                        
                         new_hedge = self.createHedge()
                         twin_for_new_hedge = self.createHedge()
-                        new_hedge.setTopology(new_vert, twin_for_new_hedge, None, hedge, rightHedge)
-                        twin_for_new_hedge.setTopology(old_vert, new_hedge, None, rightHedge.twin, hedge.twin)
 
-                        hedge.next.previous = new_hedge
-                        new_vert.incidentEdge = new_hedge
+                        new_hedge.setTopology(old_vert, twin_for_new_hedge, hedge.incidentFace, new_v_hedge, hedge.twin.next.twin)
+                        twin_for_new_hedge.setTopology(new_vert, new_hedge, hedge.incidentFace, hedge, rightHedge)
+                        new_v_hedge.origin.incidentEdge = new_v_hedge
+                        
+                        hedge.previous.next = new_hedge
+                        hedge.previous = new_hedge.twin
+
                     
-                print("Can try to expand to : ", possibleDirs)
 
             # start
             if myDir == 'd':
@@ -324,7 +300,6 @@ class DCEL(object):
                 sweepingLine.remove(hedge.origin.x)
             elif prevDir == 'd':
                 sweepingLine.remove(hedge.previous.origin.x)
-            print ("Sweeping is now ", sweepingLine)
                     
                     
 
