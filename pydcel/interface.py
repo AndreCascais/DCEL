@@ -45,6 +45,8 @@ class dcelVis(Tk):
         self.bind('e', self.iteratehedge)
         self.bind('v', self.iteratevertex)
         self.bind('f', self.iterateface)
+        self.bind('t', self.iteratetwin)
+        self.bind('b', self.iterateprev)
         self.canvas = Canvas(self, bg="white", width=self.sizex, height=self.sizey)
         self.canvas.pack()
 
@@ -68,6 +70,7 @@ class dcelVis(Tk):
         self.D = None
         self.bind_dcel(dcel)
         self.print_help(None)
+        self.hedge = dcel.hedgeList[0].previous
 
     def t(self, x, y):
         """transform data coordinates to screen coordinates"""
@@ -167,16 +170,36 @@ class dcelVis(Tk):
             self.vertex_it = self.type_iterator('vertex')
             self.vertex_it.next()
 
+    def iteratetwin(self, event):
+        try:
+            self.hedge_it.next()
+        except StopIteration:
+            self.hedge_it = self.type_iterator('twin')
+            self.hedge_it.next()
+
+    def iterateprev(self, event):
+        try:
+            self.hedge_it.next()
+        except StopIteration:
+            self.hedge_it = self.type_iterator('prev')
+            self.hedge_it.next()
+
     def type_iterator(self, q='hedge'):
         if q == 'hedge':
-            for e in self.D.hedgeList:
-                yield self.explain_hedge(e)
+            self.hedge = self.hedge.next
+            yield self.explain_hedge(self.hedge)
         elif q == 'face':
             for e in self.D.faceList:
                 yield self.explain_face(e)
         elif q == 'vertex':
             for e in self.D.vertexList:
                 yield self.explain_vertex(e)
+        elif q == 'twin':
+            self.hedge = self.hedge.twin
+            yield self.explain_hedge(self.hedge)
+        elif q == 'prev':
+            self.hedge = self.hedge.previous
+            yield self.explain_hedge(self.hedge)
 
     def explain_hedge(self, e):
         print(e)

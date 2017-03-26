@@ -5,24 +5,38 @@ def ply2datadict(infile):
     datadict = {}
     with open(infile) as f:
         vertexcount = None
-        while True:
-            line = f.readline()
-            if line.startswith("element vertex"):
-                vertexcount = line.split()[-1]
-            if line.startswith("end_header"):
-                break
+        holecount = None
+        flag_grid = False
+        
+        line = f.readline()
 
         datadict['coords'] = []
-
-        for i in range(int(vertexcount)):
+        datadict['faces'] = []
+        
+        if int(line) == 1:
+            flag_grid = True
+        vertexcount = int(f.readline())
+        for i in range(vertexcount):
             line = f.readline()
             x, y = line.split()
             datadict['coords'].append([float(x), float(y)])
-
-        datadict['faces'] = []
         vertex_ids = [x for x in range(int(vertexcount))]
+        print (vertex_ids)
         datadict['faces'].append(vertex_ids)
-
+            
+        holecount = int(f.readline())
+        if holecount != 0:
+            print("Going to check holes")
+            for i in range(holecount):
+                hole_vertex_count = int(f.readline())
+                vertexcount = vertexcount + hole_vertex_count
+                for j in range(hole_vertex_count):
+                    line = f.readline()
+                    x, y = line.split()
+                    datadict['coords'].append([float(x), float(y)])
+                vertex_ids = [x for x in range(vertexcount - hole_vertex_count, vertexcount)]
+                print (vertex_ids)
+                datadict['faces'].append(vertex_ids)
     return datadict
 
 
@@ -64,8 +78,8 @@ def datadict2dcel(datadict):
         dcel_v = D.createVertex(v[0], v[1])
 
     # create faces
-    ## Only one face starting
-    D.createFace()
+    for f in range(len(datadict['faces'])):
+        D.createFace()
     # the last face in the DCEL will be the infinite face:
     infinite_face = D.createInfFace()
 
@@ -95,6 +109,9 @@ def datadict2dcel(datadict):
             inf_edge = e_twin
         else:
             e_twin = D.hedgeList[twin_edge.pop()]
+        print (D.faceList)
+        print (face)
+        print (e)
         D.faceList[face].setTopology(e)
 
         e.setTopology(D.vertexList[v_origin], e_twin, D.faceList[face], D.hedgeList[nextedge], D.hedgeList[prevedge])

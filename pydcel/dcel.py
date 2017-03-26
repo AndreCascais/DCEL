@@ -30,7 +30,7 @@ class vertex(object):
         v1 = np.array([self.x - prev.x, self.y - prev.y])
         v2 = np.array([post.x - self.x, post.y - self.y])
 
-        # reflex, same line, same line
+    # reflex, same line, same line
         if (np.cross(v1, v2) == -1 or v1[0] == v2[0]) :
             self.isReflex = True
         else:
@@ -148,20 +148,6 @@ class DCEL(object):
         f = face(identifier)
         self.infiniteFace = f
         return f
-        
-    def remove(self, element):
-        # TODO: verify topology? i.e. make sure no reference to element exists...
-        if type(element) is vertex:
-            self.vertexList.remove(element)
-            del element
-        elif type(element) is hedge:
-            self.hedgeList.remove(element)
-            del element
-        elif type(element) is face:
-            self.faceList.remove(element)
-            del element
-        else:
-            print("illegal element type")
 
     def __repr__(self):
         s = ""
@@ -173,10 +159,6 @@ class DCEL(object):
             s += "{} : \t{} \t{}\n".format(f, f.outerComponent, f.innerComponent)
         return s
 
-    def checkEdgeTwins(self):
-        for e in self.hedgeList:
-            if not e == e.twin.twin:
-                print("this edge has a problem with its twin:",e)
             
     def separateHedges(self):
         """
@@ -192,28 +174,47 @@ class DCEL(object):
     def horizontalSweep(self):
         for vertex in self.vertexList:
             vertex.checkReflex()
-        sweepingLine = AVLTree()
+        sweeping_line = AVLTree()
         
         for hedge in self.eventList:
-            myDir = hedge.getDirection()
-            prevDir = hedge.previous.getDirection()
-            
+            my_dir = hedge.getDirection()
+            prev_dir = hedge.previous.getDirection()
+            # start
+            if my_dir == 'd':
+                # direction da sweeping line -> add vertex 
+                sweeping_line.insert(hedge.origin.x, hedge)
+            elif prev_dir == 'u':
+                sweeping_line.insert(hedge.previous.origin.x, hedge.previous)
+                
+            # close
+            if my_dir == 'u':
+                print("Trying to remove", hedge.origin.x)
+                sweeping_line.remove(hedge.origin.x)
+            elif prev_dir == 'd':
+                print("Trying to remove", hedge.previous.origin.x)
+                sweeping_line.remove(hedge.previous.origin.x)
+            print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.y)
+
+
             # expand
             if hedge.origin.isReflex:
-                possibleDirs = ['l', 'r']
-                if myDir == 'l' or prevDir == 'r':
-                    possibleDirs.remove('l')
-                if myDir == 'r' or prevDir == 'l':
-                    possibleDirs.remove('r')
+                possible_dirs = ['l', 'r']
+                if my_dir == 'l' or prev_dir == 'r':
+                    possible_dirs.remove('l')
+                if my_dir == 'r' or prev_dir == 'l':
+                    possible_dirs.remove('r')
                     
                 # esquerda -> edge tem de descer
                 # direita -> edge tem de subir
                 
-                if 'l' in possibleDirs:
-                    leftHedge = sweepingLine.floor_item(hedge.origin.x - 1)[1]
-                    if (leftHedge.getDirection() == 'd'):
+                if 'l' in possible_dirs:
+                    
+                    left_hedge = sweeping_line.floor_item(hedge.origin.x - 1)[1]
+                    if left_hedge == None:
+                        continue
+                    if (left_hedge.getDirection() == 'd'):
 
-                        coords = findIntersection(hedge,leftHedge)
+                        coords = findIntersection(hedge,left_hedge)
                         old_vert = hedge.origin
                         new_vert = self.createVertex(coords.x, coords.y)
                         
@@ -221,38 +222,45 @@ class DCEL(object):
                         new_v_hedge = self.createHedge()
                         new_v_twin_hedge = self.createHedge()
 
-                        new_vert.incidentEdge = leftHedge
+                        new_vert.incidentEdge = left_hedge
 
-                        new_v_hedge.setTopology(leftHedge.origin, new_v_twin_hedge, leftHedge.incidentFace, leftHedge, leftHedge.previous)
+                        new_v_hedge.setTopology(left_hedge.origin, new_v_twin_hedge, left_hedge.incidentFace, left_hedge, left_hedge.previous)
                         new_v_hedge.origin.incidentEdge = new_v_hedge
-                        new_v_twin_hedge.setTopology(new_vert, new_v_hedge, leftHedge.twin.incidentFace, leftHedge.twin.next, leftHedge.twin.previous)
+                        new_v_twin_hedge.setTopology(new_vert, new_v_hedge, left_hedge.twin.incidentFace, left_hedge.twin.next, left_hedge.twin)
     
-                        leftHedge.origin = new_vert
+                        left_hedge.origin = new_vert
 
-                        leftHedge.previous.next = new_v_hedge
-                        leftHedge.previous = new_v_hedge
+                        left_hedge.previous.next = new_v_hedge
+                        left_hedge.previous = new_v_hedge
 
-                        leftHedge.twin.next.previous = new_v_twin_hedge
-                        leftHedge.twin.next = new_v_twin_hedge
+                        left_hedge.twin.next.previous = new_v_twin_hedge
+                        left_hedge.twin.next = new_v_twin_hedge
                     
                         # Join new hedge
+                        # new_h_hedge -> above hedge
+                        new_h_hedge = self.createHedge()
+                        new_h_twin_hedge = self.createHedge()
+
+                        new_h_hedge.setTopology(new_vert, new_h_twin_hedge, hedge.incidentFace, hedge, new_v_hedge)
+                        new_h_twin_hedge.setTopology(old_vert, new_h_hedge, hedge.incidentFace, left_hedge, hedge.previous)
+
+                        # Atualizacoes
+
+                        hedge.previous.next = new_h_twin_hedge
+                        hedge.previous = new_h_hedge
                         
-                        new_hedge = self.createHedge()
-                        twin_for_new_hedge = self.createHedge()
+                        new_v_hedge.next.previous = new_h_twin_hedge
+                        new_v_hedge.next = new_h_hedge
 
-                        new_hedge.setTopology(new_vert, twin_for_new_hedge, hedge.incidentFace, hedge, new_v_hedge)
-                        twin_for_new_hedge.setTopology(old_vert, new_hedge, hedge.incidentFace, leftHedge, hedge.twin.next.twin)
-
-                        # Isto esta mal
-                        hedge.next.previous = new_hedge
-                        hedge.next = new_hedge.twin
                         
 
-                if 'r' in possibleDirs:
-                    rightHedge = sweepingLine.ceiling_item(hedge.origin.x + 1)[1]
-                    if (rightHedge.getDirection() == 'u'):
+                if 'r' in possible_dirs:
+                    right_hedge = sweeping_line.ceiling_item(hedge.origin.x + 1)[1]
+                    if right_hedge == None:
+                        continue
+                    if (right_hedge.getDirection() == 'u'):
 
-                        coords = findIntersection(hedge, rightHedge)
+                        coords = findIntersection(hedge, right_hedge)
                         old_vert = hedge.origin
                         new_vert = self.createVertex(coords.x, coords.y)
                         
@@ -262,61 +270,34 @@ class DCEL(object):
 
                         new_vert.incidentEdge = new_v_hedge
                         
-                        new_v_hedge.setTopology(new_vert, new_v_twin_hedge, rightHedge.incidentFace, rightHedge.next, rightHedge)
+                        new_v_hedge.setTopology(new_vert, new_v_twin_hedge, right_hedge.incidentFace, right_hedge.next, right_hedge)
 
-                        new_v_twin_hedge.setTopology(rightHedge.twin.origin, new_v_hedge, rightHedge.twin.incidentFace, rightHedge.twin, rightHedge.twin.previous)
+                        new_v_twin_hedge.setTopology(right_hedge.twin.origin, new_v_hedge, right_hedge.twin.incidentFace, right_hedge.twin, right_hedge.twin.previous)
     
-                        rightHedge.twin.origin = new_vert
+                        right_hedge.twin.origin = new_vert
 
-                        rightHedge.next.previous = new_v_hedge
-                        rightHedge.next = new_v_hedge
+                        right_hedge.next.previous = new_v_hedge
+                        right_hedge.next = new_v_hedge
 
-                        rightHedge.twin.previous.next = new_v_twin_hedge
-                        rightHedge.twin.previous = new_v_twin_hedge
+                        right_hedge.twin.previous.next = new_v_twin_hedge
+                        right_hedge.twin.previous = new_v_twin_hedge
                     
                         # Join new hedge
+
+                        #new_h_hedge fica abaixo
+                        new_h_hedge = self.createHedge()
+                        new_h_twin_hedge = self.createHedge()
+
+                        new_h_hedge.setTopology(old_vert, new_h_twin_hedge, hedge.incidentFace, new_v_hedge, hedge.previous)
+                        new_h_twin_hedge.setTopology(new_vert, new_h_hedge, hedge.incidentFace, hedge, right_hedge)
+
+                        #Atualizacoes
                         
-                        new_hedge = self.createHedge()
-                        twin_for_new_hedge = self.createHedge()
+                        hedge.previous.next = new_h_hedge
+                        hedge.previous = new_h_twin_hedge
 
-                        new_hedge.setTopology(old_vert, twin_for_new_hedge, hedge.incidentFace, new_v_hedge, hedge.twin.next.twin)
-                        twin_for_new_hedge.setTopology(new_vert, new_hedge, hedge.incidentFace, hedge, rightHedge)
-                        new_v_hedge.origin.incidentEdge = new_v_hedge
-                        
-                        hedge.previous.next = new_hedge
-                        hedge.previous = new_hedge.twin
-
-                    
-
-            # start
-            if myDir == 'd':
-                # direction da sweeping line -> add vertex 
-                sweepingLine.insert(hedge.origin.x, hedge)
-            elif prevDir == 'u':
-                sweepingLine.insert(hedge.previous.origin.x, hedge.previous)
-                
-            # close
-            if myDir == 'u':
-                sweepingLine.remove(hedge.origin.x)
-            elif prevDir == 'd':
-                sweepingLine.remove(hedge.previous.origin.x)
-                    
-                    
-
-
-# class compHedge:
-#     def __init__(self, hedge, key):
-#         self.hedge = hedge
-#         self.key = key
-#     def __lt_(self, hedge2):
-#         print("lt", self, hedge2, " < ", self.key < hedge2.key)
-#         return self.key < hedge2.key
-#     def __eq__(self, hedge2):
-#         print("eq", self, hedge2, " = ", self.key == hedge2.key)
-#         return self.key == hedge2.key
-#     def __repr__(self):
-#         return self.hedge.__repr__()
-#
+                        new_v_hedge.previous.next = new_h_twin_hedge
+                        new_v_hedge.previous = new_h_hedge
 #
 # def orderSweep(l):
 #     l = sorted(l, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
