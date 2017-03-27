@@ -23,7 +23,9 @@ q - quit
 h - print help message
 p - print dcel
 
-e - iterate through halfedges
+e - iterate through next hedges
+b - iterate through previous hedges
+t - iterate through twins
 v - iterate through vertices
 f - iterate through faces
 """
@@ -70,7 +72,7 @@ class dcelVis(Tk):
         self.D = None
         self.bind_dcel(dcel)
         self.print_help(None)
-        self.hedge = dcel.hedgeList[0].previous
+        self.hedge = dcel.hedgeList[-1].previous
 
     def t(self, x, y):
         """transform data coordinates to screen coordinates"""
