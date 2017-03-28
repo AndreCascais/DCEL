@@ -276,7 +276,6 @@ class dcelVis(Tk):
 
         if options == {}:
             options = {'fill': '#eeeeee', 'outline': ''}
-
         vlist = [(v.x, v.y) for v in f.loopOuterVertices()]
         return self.draw.polygon(vlist, **options)
 

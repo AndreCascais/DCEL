@@ -62,15 +62,18 @@ def datadict2dcel(datadict):
         for index in range(len(face)):
     
             D.hedgeList[offset + index].setTopology(D.vertexList[face[index]], D.hedgeList[offset + n_vertex_in_face + index],int_face, D.hedgeList[offset + (index + 1)%n_vertex_in_face], D.hedgeList[offset + (index - 1)%n_vertex_in_face])
+
             D.vertexList[face[index]].incidentEdge = D.hedgeList[offset + index]
+            
             D.hedgeList[offset + n_vertex_in_face + index].setTopology(D.vertexList[face[(index + 1)%n_vertex_in_face]], D.hedgeList[offset + index], inf_face, D.hedgeList[offset + n_vertex_in_face + (index - 1)%n_vertex_in_face], D.hedgeList[offset + n_vertex_in_face + (index + 1)%n_vertex_in_face])
+            
         offset += 2 * n_vertex_in_face
     int_face.setTopology(D.hedgeList[0])
     inf_face.setTopology(D.hedgeList[first_twin])
-
     
     D.separateHedges()
     D.horizontalSweep()
+    
     return D
 
 
