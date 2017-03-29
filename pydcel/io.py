@@ -71,9 +71,11 @@ def datadict2dcel(datadict):
     int_face.setTopology(D.hedgeList[0])
     inf_face.setTopology(D.hedgeList[first_twin])
     
-    D.separateHedges()
-    D.horizontalSweep()
-    
+    #D.separateHedges('h')
+    #D.horizontalSweep()
+    #print ("Horizontal done")
+    D.separateHedges('v')
+    D.verticalSweep()
     return D
 
 
