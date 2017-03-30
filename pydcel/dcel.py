@@ -93,6 +93,12 @@ class hedge(object):
             x = self.origin.x
             y = vertex.y
         return Point(x,y)
+    
+    def isTwinBlocking(self, direction):
+        if direction == 'u': # if i go left my twin goes right and is above me -> blocks
+            return self.getDirection() == 'l'
+        elif direction == 'd':
+            return self.getDirection() == 'r'
 
 
 
@@ -179,7 +185,7 @@ class DCEL(object):
         if (direction == 'h'):
             events = sorted(events, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
         else:
-            events = sorted(events, key = lambda x: (x.origin.x, x.origin.y), reverse = True)
+            events = sorted(events, key = lambda x: (x.origin.x, -x.origin.y), reverse = True)
         l = []
         for i in events:
             if l == [] or (l[0].origin.y == i.origin.y and direction == 'h') or (l[0].origin.x == i.origin.x and direction == 'v'):
@@ -375,9 +381,9 @@ class DCEL(object):
 
                 if not sweeping_line.is_empty(): # only try to expand if sweeping line is not empty
                     possible_dirs = ['u', 'd']
-                    if my_dir == 'u' or prev_dir == 'd':
+                    if my_dir == 'u' or prev_dir == 'd' or hedge.isTwinBlocking('u'):
                         possible_dirs.remove('u')
-                    if my_dir == 'd' or prev_dir == 'u':
+                    if my_dir == 'd' or prev_dir == 'u' or hedge.isTwinBlocking('d') :
                         possible_dirs.remove('d')
 
                     # going up -> hedge must go left
@@ -387,18 +393,12 @@ class DCEL(object):
                     if 'd' in possible_dirs and hedge.origin.y > sweeping_line.min_item()[0]:
                         down_hedge = sweeping_line.floor_item(hedge.origin.y - 1)[1]
                         if (down_hedge.getDirection() == 'r'):
+                            print ("Going down")
                             old_vert = hedge.origin
-                            if (down_hedge.origin.x == hedge.origin.x): # So vou tratar else
-                                new_v_hedge = left_edge.previous
-                                new_vert = left_hedge.origin
-                            elif (down_hedge.next.origin.x == hedge.origin.x):
-                                new_v_hedge = left_hedge
-                                new_vert = left_hedge.next.origin
-                            else:
-                                coords = down_hedge.findIntersection(old_vert)
-                                new_vert = self.createVertex(coords.x, coords.y)
-                                self.divideHedge(down_hedge, coords, 'r')
-                                new_h_hedge = down_hedge.next
+                            coords = down_hedge.findIntersection(old_vert)
+                            new_vert = self.createVertex(coords.x, coords.y)
+                            self.divideHedge(down_hedge, coords, 'r')
+                            new_h_hedge = down_hedge.next
                                 
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'd')
 
@@ -408,9 +408,21 @@ class DCEL(object):
 
                         if (up_hedge.getDirection() == 'l'):
                             old_vert = hedge.origin
-                            coords = up_hedge.findIntersection(old_vert)
-                            new_vert = self.createVertex(coords.x, coords.y)
-                            self.divideHedge(up_hedge, coords, 'l')
-                            new_h_hedge = up_hedge.previous
+                            if (up_hedge.next.origin.x == hedge.origin.x): # So vou tratar else
+                                print ("Case one")
+                                print ("uh", up_hedge, "h", hedge)
+                                new_h_hedge = up_hedge
+                                new_vert = up_hedge.next.origin
+                            elif (up_hedge.origin.x == hedge.origin.x):
+                                print ("Case two")
+                                print ("uh", up_hedge, "h", hedge)
+                                new_h_hedge = up_hedge.previous
+                                new_vert = up_hedge.origin
+                            else:
+                                coords = up_hedge.findIntersection(old_vert)
+                                new_vert = self.createVertex(coords.x, coords.y)
+                                self.divideHedge(up_hedge, coords, 'l')
+                                new_h_hedge = up_hedge.previous
+                                
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'u')
     
