@@ -1,11 +1,11 @@
 from __future__ import print_function
 import numpy as np
 from bintrees import AVLTree
-
+import copy
 from collections import namedtuple
+
 Point = namedtuple('Point', ['x', 'y'])
 
-XMinus, XPlus, YMinus, YPlus = range(4)
 
 class vertex(object):
     
@@ -32,7 +32,7 @@ class vertex(object):
         v1 = np.array([self.x - prev.x, self.y - prev.y])
         v2 = np.array([post.x - self.x, post.y - self.y])
 
-    # reflex, same line, same line
+        # reflex, same line, same line
         if (np.cross(v1, v2) == -1 or v1[0] == v2[0]) :
             self.isReflex = True
         else:
@@ -86,7 +86,7 @@ class hedge(object):
         
     def findIntersection(self, vertex):
         # Check whether self is horizontal or vertical
-        if (self.origin.y == self.next.origin.y): #self is horizontal
+        if self.origin.y == self.next.origin.y:  # self is horizontal
             x = vertex.x
             y = self.origin.y
         else: # self is vertical
@@ -95,11 +95,10 @@ class hedge(object):
         return Point(x,y)
     
     def isTwinBlocking(self, direction):
-        if direction == 'u': # if i go left my twin goes right and is above me -> blocks
+        if direction == 'u':  # if i go left my twin goes right and is above me -> blocks
             return self.getDirection() == 'l'
         elif direction == 'd':
             return self.getDirection() == 'r'
-
 
 
 class face(object):
@@ -171,7 +170,25 @@ class DCEL(object):
             s += "{} : \t{} \t{}\n".format(f, f.outerComponent, f.innerComponent)
         return s
 
-            
+    def renameFaces(self):
+        copy_of_edge_list = copy.copy(self.hedgeList)
+        while len(copy_of_edge_list) != 0:
+
+            some_initial_edge = copy_of_edge_list.pop(0)
+
+            if some_initial_edge.incidentFace != self.infiniteFace:
+                new_face = self.createFace()
+                new_face.setTopology(some_initial_edge)
+                current_edge = some_initial_edge.next
+                while True:
+                    if some_initial_edge == current_edge:
+                        break
+                    else:
+                        print("adding hedge {} to face {}".format(current_edge,new_face))
+                        current_edge.incidentFace = new_face
+                        copy_of_edge_list.remove(current_edge)
+                        current_edge = current_edge.next
+
     def separateHedges(self, direction):
         """
         separates vertical and horizontal edges
@@ -195,7 +212,7 @@ class DCEL(object):
                 l = []
                 l.append(i)
         self.eventList.append(l)
-        
+
     def divideHedge (self, hedge, point, direction):
         
         new_vert = self.createVertex(point.x, point.y)
@@ -231,7 +248,6 @@ class DCEL(object):
             
             hedge.twin.previous.next = new_twin_hedge
             hedge.twin.previous = new_twin_hedge
-            
 
     def joinHedges(self, hedge, new_hedge, old_vert, new_vert, direction):
         # Join new hedge
@@ -275,8 +291,7 @@ class DCEL(object):
 
             new_hedge.previous.next = new_j_twin_hedge
             new_hedge.previous = new_j_hedge
-            
-            
+
     def horizontalSweep(self):
 
         sweeping_line = AVLTree()
@@ -298,15 +313,15 @@ class DCEL(object):
                 print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.y)
                 my_dir = hedge.getDirection()
                 prev_dir = hedge.previous.getDirection()
+
                 # close
                 if my_dir == 'u':
                     sweeping_line.remove(hedge.origin.x)
                 elif prev_dir == 'd':
                     sweeping_line.remove(hedge.previous.origin.x)
                     
-            # expand
-
-                if not sweeping_line.is_empty(): # only try to expand if sweeping line is not empty
+                # expand
+                if not sweeping_line.is_empty():  # only try to expand if sweeping line is not empty
                     possible_dirs = ['l', 'r']
                     if my_dir == 'l' or prev_dir == 'r':
                         possible_dirs.remove('l')
@@ -318,12 +333,12 @@ class DCEL(object):
 
                     if 'l' in possible_dirs and hedge.origin.x > sweeping_line.min_item()[0]:
                         left_hedge = sweeping_line.floor_item(hedge.origin.x - 1)[1]
-                        if (left_hedge.getDirection() == 'd'):
+                        if left_hedge.getDirection() == 'd':
                             old_vert = hedge.origin
-                            if (left_hedge.origin.y == hedge.origin.y):
+                            if left_hedge.origin.y == hedge.origin.y:
                                 new_v_hedge = left_hedge.previous
                                 new_vert = left_hedge.origin
-                            elif (left_hedge.next.origin.y == hedge.origin.y):
+                            elif left_hedge.next.origin.y == hedge.origin.y:
                                 new_v_hedge = left_hedge
                                 new_vert = left_hedge.next.origin
                             else:
@@ -334,20 +349,17 @@ class DCEL(object):
                                 
                             self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'l')
 
-
                     if 'r' in possible_dirs and hedge.origin.x < sweeping_line.max_item()[0]:
                         right_hedge = sweeping_line.ceiling_item(hedge.origin.x + 1)[1]
 
-                        if (right_hedge.getDirection() == 'u'):
+                        if right_hedge.getDirection() == 'u':
                             old_vert = hedge.origin
                             coords = right_hedge.findIntersection(old_vert)
                             new_vert = self.createVertex(coords.x, coords.y)
                             self.divideHedge(right_hedge, coords, 'u')
                             new_v_hedge = right_hedge.next
                             self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'r')
-                            
 
-                          
     def verticalSweep(self):
 
         sweeping_line = AVLTree()
@@ -370,20 +382,21 @@ class DCEL(object):
                 print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.x)
                 my_dir = hedge.getDirection()
                 prev_dir = hedge.previous.getDirection()
+
                 # close
                 if my_dir == 'r':
                     sweeping_line.remove(hedge.origin.y)
                 elif prev_dir == 'l':
                     sweeping_line.remove(hedge.previous.origin.y)
                     
-                #print("Sweeping before expanding now is :", sweeping_line, "on ", hedge.origin.x)
-            # expand
+                # print("Sweeping before expanding now is :", sweeping_line, "on ", hedge.origin.x)
 
-                if not sweeping_line.is_empty(): # only try to expand if sweeping line is not empty
+                # expand
+                if not sweeping_line.is_empty():  # only try to expand if sweeping line is not empty
                     possible_dirs = ['u', 'd']
-                    if my_dir == 'u' or prev_dir == 'd' or hedge.isTwinBlocking('u'):
+                    if my_dir == 'u' or prev_dir == 'd':
                         possible_dirs.remove('u')
-                    if my_dir == 'd' or prev_dir == 'u' or hedge.isTwinBlocking('d') :
+                    if my_dir == 'd' or prev_dir == 'u':
                         possible_dirs.remove('d')
 
                     # going up -> hedge must go left
@@ -392,7 +405,8 @@ class DCEL(object):
 
                     if 'd' in possible_dirs and hedge.origin.y > sweeping_line.min_item()[0]:
                         down_hedge = sweeping_line.floor_item(hedge.origin.y - 1)[1]
-                        if (down_hedge.getDirection() == 'r'):
+
+                        if down_hedge.getDirection() == 'r' and down_hedge.incidentFace == hedge.incidentFace:
                             print ("Going down")
                             old_vert = hedge.origin
                             coords = down_hedge.findIntersection(old_vert)
@@ -402,18 +416,17 @@ class DCEL(object):
                                 
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'd')
 
-
                     if 'u' in possible_dirs and hedge.origin.y < sweeping_line.max_item()[0]:
                         up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1]
 
-                        if (up_hedge.getDirection() == 'l'):
+                        if up_hedge.getDirection() == 'l' and up_hedge.incidentFace == hedge.incidentFace:
                             old_vert = hedge.origin
-                            if (up_hedge.next.origin.x == hedge.origin.x): # So vou tratar else
+                            if up_hedge.next.origin.x == hedge.origin.x:
                                 print ("Case one")
                                 print ("uh", up_hedge, "h", hedge)
                                 new_h_hedge = up_hedge
                                 new_vert = up_hedge.next.origin
-                            elif (up_hedge.origin.x == hedge.origin.x):
+                            elif up_hedge.origin.x == hedge.origin.x:
                                 print ("Case two")
                                 print ("uh", up_hedge, "h", hedge)
                                 new_h_hedge = up_hedge.previous
@@ -425,4 +438,3 @@ class DCEL(object):
                                 new_h_hedge = up_hedge.previous
                                 
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'u')
-    
