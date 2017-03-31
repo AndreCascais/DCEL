@@ -1,12 +1,7 @@
-ply
-format ascii 1.0
-comment python generated
-element vertex 4
-property float x
-property float y
-property list uchar int vertex_indices
-end_header
-0.0 0.0
-0.0 1.0
-1.0 1.0
-1.0 0.0
+0
+4
+0 0
+0 1
+1 1
+1 0
+0

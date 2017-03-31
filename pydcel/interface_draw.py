@@ -5,13 +5,13 @@ class draw(object):
         self.m = master
 
     def point(self, x, y, size=3, **attributes):
-        x,y = self.m.t(x,y)
-        x-=size
-        y-=size
+        x, y = self.m.t(x, y)
+        x -= size
+        y -= size
         return self.m.canvas.create_oval(x, y, x+2*size, y+2*size, **attributes)
         
     def polygon(self, ring, **attributes):
-        temp = [self.m.t(x[0],x[1]) for x in ring]
+        temp = [self.m.t(x[0], x[1]) for x in ring]
         return self.m.canvas.create_polygon(temp, **attributes)
         
     def edge(self, a, b, **attributes):
@@ -20,9 +20,9 @@ class draw(object):
         return self.m.canvas.create_line(ax, ay, bx, by, **attributes)
         
     def rectangle(self, topleft, bottomright, **attributes):
-        tx,ty = self.m.t(*topleft)
-        bx,by = self.m.t(*bottomright)
-        return self.m.canvas.create_rectangle(tx,ty,bx,by, **attributes)
+        tx, ty = self.m.t(*topleft)
+        bx, by = self.m.t(*bottomright)
+        return self.m.canvas.create_rectangle(tx, ty, bx, by, **attributes)
 
     def deleteItems(self, items):
         for i in items:

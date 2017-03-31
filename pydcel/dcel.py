@@ -20,7 +20,7 @@ class vertex(object):
         self.incidentEdge = newIncedentEdge
         
     def p(self):
-        return (self.x,self.y)
+        return self.x,self.y
 
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
@@ -33,7 +33,7 @@ class vertex(object):
         v2 = np.array([post.x - self.x, post.y - self.y])
 
         # reflex, same line, same line
-        if (np.cross(v1, v2) == -1 or v1[0] == v2[0]) :
+        if np.cross(v1, v2) == -1 or v1[0] == v2[0] :
             self.isReflex = True
         else:
             self.isReflex = False
@@ -135,7 +135,7 @@ class DCEL(object):
             return 0
         else:
             return L[-1].identifier + 1
-        
+
     def createVertex(self, px, py):
         identifier = self.getNewId(self.vertexList)
         v = vertex(px,py, identifier)
@@ -206,23 +206,22 @@ class DCEL(object):
         self.eventList = []
         events = []
         for i in self.hedgeList:
-            if (i.incidentFace.identifier  != "i"):
+            if i.incidentFace.identifier != "i":
                 events.append(i)
-        if (direction == 'h'):
-            events = sorted(events, key = lambda x: (x.origin.y, x.origin.x), reverse = True)
+        if direction == 'h':
+            events = sorted(events, key=lambda x: (x.origin.y, x.origin.x), reverse=True)
         else:
-            events = sorted(events, key = lambda x: (x.origin.x, -x.origin.y), reverse = True)
+            events = sorted(events, key=lambda x: (x.origin.x, -x.origin.y), reverse=True)
         l = []
         for i in events:
             if l == [] or (l[0].origin.y == i.origin.y and direction == 'h') or (l[0].origin.x == i.origin.x and direction == 'v'):
                 l.append(i)
             else:
                 self.eventList.append(l)
-                l = []
-                l.append(i)
+                l = [i]
         self.eventList.append(l)
 
-    def divideHedge (self, hedge, point, direction):
+    def divideHedge(self, hedge, point, direction):
         
         new_vert = self.createVertex(point.x, point.y)
         
@@ -230,13 +229,14 @@ class DCEL(object):
         new_hedge = self.createHedge()
         new_twin_hedge = self.createHedge()
 
-        if (direction == 'd' or direction == 'l'):
-            #new_vert.incidentEdge = hedge
+        if direction == 'd' or direction == 'l':
 
             new_hedge.setTopology(hedge.origin, new_twin_hedge, hedge.incidentFace, hedge, hedge.previous)
-            #new_hedge.origin.incidentEdge = new_hedge
             new_twin_hedge.setTopology(new_vert, new_hedge, hedge.twin.incidentFace, hedge.twin.next, hedge.twin)
-            
+
+            # new_hedge.origin.incidentEdge = new_hedge
+            # new_vert.incidentEdge = hedge
+
             hedge.origin = new_vert
             
             hedge.previous.next = new_hedge
@@ -245,7 +245,7 @@ class DCEL(object):
             hedge.twin.next.previous = new_twin_hedge
             hedge.twin.next = new_twin_hedge
 
-        elif (direction == 'u' or direction == 'r'):
+        elif direction == 'u' or direction == 'r':
         
             new_hedge.setTopology(new_vert, new_twin_hedge, hedge.incidentFace, hedge.next, hedge)
             new_twin_hedge.setTopology(hedge.twin.origin, new_hedge, hedge.twin.incidentFace, hedge.twin, hedge.twin.previous)

@@ -186,7 +186,7 @@ class dcelVis(Tk):
             self.hedge_it = self.type_iterator('prev')
             self.hedge_it.next()
 
-    def type_iterator(self, q='hedge'):
+    def type_iterator(self, q):
         if q == 'hedge':
             self.hedge = self.hedge.next
             yield self.explain_hedge(self.hedge)
@@ -260,7 +260,7 @@ class dcelVis(Tk):
         v = vec2(vx, vy)
         v_ = v.orthogonal_l() * offset
 
-        v = v - v.normalized() * .25
+        v -= v.normalized() * .25
         ex, ey = sx + v.x, sy + v.y
 
         return self.draw.edge((sx + v_.x, sy + v_.y), (ex + v_.x, ey + v_.y), **options)

@@ -27,7 +27,7 @@ def ply2datadict(infile):
         if holecount != 0:
             for i in range(holecount):
                 hole_vertex_count = int(f.readline())
-                vertexcount = vertexcount + hole_vertex_count
+                vertexcount += hole_vertex_count
                 for j in range(hole_vertex_count):
                     line = f.readline()
                     x, y = line.split()
