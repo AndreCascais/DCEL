@@ -75,8 +75,9 @@ def datadict2dcel(datadict):
     D.horizontalSweep()
     D.renameFaces()
     print ("Horizontal done")
-    #D.separateHedges('v')
-    #D.verticalSweep()
+    D.separateHedges('v')
+    D.verticalSweep()
+    D.renameFaces()
     return D
 
 

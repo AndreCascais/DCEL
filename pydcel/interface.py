@@ -204,7 +204,7 @@ class dcelVis(Tk):
             yield self.explain_hedge(self.hedge)
 
     def explain_hedge(self, e):
-        print(e)
+        print("I'm on hedge {} in face {}".format(e, e.incidentFace))
         self.draw.deleteItems(self.highlight_cache)
 
         i1 = self.draw_dcel_face(e.incidentFace, fill='#ffc0bf', outline='')

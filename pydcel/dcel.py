@@ -172,14 +172,23 @@ class DCEL(object):
 
     def renameFaces(self):
         copy_of_edge_list = copy.copy(self.hedgeList)
+        flag_first = True
         while len(copy_of_edge_list) != 0:
 
             some_initial_edge = copy_of_edge_list.pop(0)
 
             if some_initial_edge.incidentFace != self.infiniteFace:
-                new_face = self.createFace()
-                new_face.setTopology(some_initial_edge)
+
+                if not flag_first:
+                    new_face = self.createFace()
+                    new_face.setTopology(some_initial_edge)
+                else:
+                    new_face = some_initial_edge.incidentFace
+                    flag_first = False
+
+                some_initial_edge.incidentFace = new_face
                 current_edge = some_initial_edge.next
+
                 while True:
                     if some_initial_edge == current_edge:
                         break
@@ -372,11 +381,26 @@ class DCEL(object):
                 prev_dir = hedge.previous.getDirection()
                 # start
                 if my_dir == 'l':
+
                     # direction of sweeping line -> add vertex
-                    sweeping_line.insert(hedge.origin.y, hedge)
+                    print("hedge {} is trying to insert {}".format(hedge, hedge.origin.y))
+
+                    try:
+                        value = sweeping_line.get_value(hedge.origin.y)
+                        value.append(hedge)
+                    except KeyError:
+                        sweeping_line.insert(hedge.origin.y, [hedge])
+
                 elif prev_dir == 'r':
-                    sweeping_line.insert(hedge.previous.origin.y, hedge.previous)
-                    
+
+                    print("hedge {} is trying to insert {}".format(hedge, hedge.previous.origin.y))
+
+                    try:
+                        value = sweeping_line.get_value(hedge.previous.origin.y)
+                        value.append(hedge.previous)
+                    except KeyError:
+                        sweeping_line.insert(hedge.previous.origin.y, [hedge.previous])
+
             # another to close/expand them
             for hedge in l:
                 print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.x)
@@ -385,9 +409,26 @@ class DCEL(object):
 
                 # close
                 if my_dir == 'r':
-                    sweeping_line.remove(hedge.origin.y)
+                    print("hedge {} is trying to remove {}".format(hedge, hedge.origin.y))
+
+                    # check wether hedge is removing itself
+                    if not hedge == sweeping_line.get_value(hedge.origin.y)[0] or not hedge == sweeping_line.get_value(hedge.origin.y)[-1]:
+
+                        if len(sweeping_line.get_value(hedge.origin.y)) == 0:
+                            sweeping_line.remove(hedge.origin.y)
+                        else:
+                            sweeping_line.get_value(hedge.origin.x).pop()
+
                 elif prev_dir == 'l':
-                    sweeping_line.remove(hedge.previous.origin.y)
+                    print("hedge {} is trying to remove {}".format(hedge, hedge.previous.origin.y))
+
+                    # check wether hedge is removing itself
+                    if not hedge == sweeping_line.get_value(hedge.origin.y)[0] or not hedge == sweeping_line.get_value(hedge.origin.y)[-1]:
+
+                        if len(sweeping_line.get_value(hedge.origin.y)) == 0:
+                            sweeping_line.remove(hedge.previous.origin.y)
+                        else:
+                            sweeping_line.get_value(hedge.origin.y).pop()
                     
                 # print("Sweeping before expanding now is :", sweeping_line, "on ", hedge.origin.x)
 
@@ -404,7 +445,7 @@ class DCEL(object):
                     print (hedge, "Can go to", possible_dirs)
 
                     if 'd' in possible_dirs and hedge.origin.y > sweeping_line.min_item()[0]:
-                        down_hedge = sweeping_line.floor_item(hedge.origin.y - 1)[1]
+                        down_hedge = sweeping_line.floor_item(hedge.origin.y - 1)[1][-1]
 
                         if down_hedge.getDirection() == 'r' and down_hedge.incidentFace == hedge.incidentFace:
                             print ("Going down")
@@ -417,7 +458,7 @@ class DCEL(object):
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'd')
 
                     if 'u' in possible_dirs and hedge.origin.y < sweeping_line.max_item()[0]:
-                        up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1]
+                        up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][0]
 
                         if up_hedge.getDirection() == 'l' and up_hedge.incidentFace == hedge.incidentFace:
                             old_vert = hedge.origin
