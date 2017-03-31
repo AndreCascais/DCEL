@@ -1,20 +1,19 @@
-from .dcel import vertex, hedge, face, DCEL
+from . import dcel
+
+DAT_FLAG_DOE = False
+
 
 def ply2datadict(infile):
     """collect vertex coordinates and normals from input file"""
-    datadict = {}
+    datadict = {'coords': [], 'faces': []}
+
     with open(infile) as f:
-        vertexcount = None
-        holecount = None
-        flag_grid = False
-        
         line = f.readline()
 
-        datadict['coords'] = []
-        datadict['faces'] = []
-        
         if int(line) == 1:
-            flag_grid = True
+            global DAT_FLAG_DOE
+            DAT_FLAG_DOE = True
+
         vertexcount = int(f.readline())
         for i in range(vertexcount):
             line = f.readline()
@@ -43,7 +42,7 @@ def datadict2dcel(datadict):
     hedges = {}  # he_id: (v_origin, v_end), f, nextedge, prevedge
     vertices = {}  # v_id: (e0,...,en) i.e. the edges originating from this v
 
-    D = DCEL()
+    D = dcel.DCEL()
     int_face = D.createFace()
     inf_face = D.createInfFace()
     offset = 0
@@ -61,23 +60,16 @@ def datadict2dcel(datadict):
             new_hedge_twin = D.createHedge()
         for index in range(len(face)):
     
-            D.hedgeList[offset + index].setTopology(D.vertexList[face[index]], D.hedgeList[offset + n_vertex_in_face + index],int_face, D.hedgeList[offset + (index + 1)%n_vertex_in_face], D.hedgeList[offset + (index - 1)%n_vertex_in_face])
+            D.hedgeList[offset + index].setTopology(D.vertexList[face[index]], D.hedgeList[offset + n_vertex_in_face + index], int_face, D.hedgeList[offset + (index + 1) % n_vertex_in_face], D.hedgeList[offset + (index - 1) % n_vertex_in_face])
 
             D.vertexList[face[index]].incidentEdge = D.hedgeList[offset + index]
             
-            D.hedgeList[offset + n_vertex_in_face + index].setTopology(D.vertexList[face[(index + 1)%n_vertex_in_face]], D.hedgeList[offset + index], inf_face, D.hedgeList[offset + n_vertex_in_face + (index - 1)%n_vertex_in_face], D.hedgeList[offset + n_vertex_in_face + (index + 1)%n_vertex_in_face])
+            D.hedgeList[offset + n_vertex_in_face + index].setTopology(D.vertexList[face[(index + 1) % n_vertex_in_face]], D.hedgeList[offset + index], inf_face, D.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face], D.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
             
         offset += 2 * n_vertex_in_face
     int_face.setTopology(D.hedgeList[0])
     inf_face.setTopology(D.hedgeList[first_twin])
-    
-    D.separateHedges('h')
-    D.horizontalSweep()
-    D.renameFaces()
-    print ("Horizontal done")
-    D.separateHedges('v')
-    D.verticalSweep()
-    D.renameFaces()
+
     return D
 
 

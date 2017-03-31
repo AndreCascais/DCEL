@@ -20,7 +20,7 @@ class vertex(object):
         self.incidentEdge = newIncedentEdge
         
     def p(self):
-        return self.x,self.y
+        return self.x, self.y
 
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
@@ -33,10 +33,11 @@ class vertex(object):
         v2 = np.array([post.x - self.x, post.y - self.y])
 
         # reflex, same line, same line
-        if np.cross(v1, v2) == -1 or v1[0] == v2[0] :
+        if np.cross(v1, v2) == -1 or v1[0] == v2[0]:
             self.isReflex = True
         else:
             self.isReflex = False
+
 
 class hedge(object):
     
@@ -75,13 +76,13 @@ class hedge(object):
         return "he{}".format(self.identifier)
 
     def getDirection(self):
-        if (self.origin.x > self.next.origin.x):
+        if self.origin.x > self.next.origin.x:
             return 'l'
-        elif (self.origin.x < self.next.origin.x):
+        elif self.origin.x < self.next.origin.x:
             return 'r'
-        elif (self.origin.y > self.next.origin.y):
+        elif self.origin.y > self.next.origin.y:
             return 'd'
-        elif (self.origin.y < self.next.origin.y):
+        elif self.origin.y < self.next.origin.y:
             return 'u'
         
     def findIntersection(self, vertex):
@@ -89,10 +90,10 @@ class hedge(object):
         if self.origin.y == self.next.origin.y:  # self is horizontal
             x = vertex.x
             y = self.origin.y
-        else: # self is vertical
+        else:  # self is vertical
             x = self.origin.x
             y = vertex.y
-        return Point(x,y)
+        return Point(x, y)
     
     def isTwinBlocking(self, direction):
         if direction == 'u':  # if i go left my twin goes right and is above me -> blocks
@@ -138,7 +139,7 @@ class DCEL(object):
 
     def createVertex(self, px, py):
         identifier = self.getNewId(self.vertexList)
-        v = vertex(px,py, identifier)
+        v = vertex(px, py, identifier)
         self.vertexList.append(v)
         return v
         
@@ -193,7 +194,7 @@ class DCEL(object):
                     if some_initial_edge == current_edge:
                         break
                     else:
-                        print("adding hedge {} to face {}".format(current_edge,new_face))
+                        print("adding hedge {} to face {}".format(current_edge, new_face))
                         current_edge.incidentFace = new_face
                         copy_of_edge_list.remove(current_edge)
                         current_edge = current_edge.next
@@ -264,7 +265,7 @@ class DCEL(object):
         new_j_hedge = self.createHedge()
         new_j_twin_hedge = self.createHedge()
 
-        if (direction == 'l' or direction == 'u'):
+        if direction == 'l' or direction == 'u':
             # new_j_hedge -> above hedge
             new_j_hedge.setTopology(new_vert, new_j_twin_hedge, hedge.incidentFace, hedge, new_hedge)
             new_j_twin_hedge.setTopology(old_vert, new_j_hedge, hedge.incidentFace, new_hedge.next, hedge.previous)
@@ -276,24 +277,24 @@ class DCEL(object):
         
             new_hedge.next.previous = new_j_twin_hedge
             new_hedge.next = new_j_hedge
-        elif (direction == 'r'):
-            #new_h_hedge fica abaixo
+        elif direction == 'r':
+            # new_h_hedge fica abaixo
             new_j_hedge.setTopology(old_vert, new_j_twin_hedge, hedge.incidentFace, new_hedge, hedge.previous)
             new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.next)
             
-            #Atualizacoes
+            # Update pointers between edges
             
             hedge.previous.next = new_j_hedge
             hedge.previous = new_j_twin_hedge
             
             new_hedge.previous.next = new_j_twin_hedge
             new_hedge.previous = new_j_hedge
-        elif (direction == 'd'):
-            #new_j_edge -> right
+        elif direction == 'd':
+            # new_j_edge -> right
             new_j_hedge.setTopology(old_vert, new_j_twin_hedge, hedge.incidentFace, new_hedge, hedge.previous)
             new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.previous)
 
-            #updates
+            # Update pointers between edges
 
             hedge.previous.next = new_j_hedge
             hedge.previous = new_j_twin_hedge

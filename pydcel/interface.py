@@ -12,7 +12,6 @@ except ImportError:
 
 try:
     from pyflann import FLANN
-
     WITH_FLANN = True
 except ImportError:
     print("couldn't import pyflann")
@@ -78,13 +77,13 @@ class dcelVis(Tk):
         """transform data coordinates to screen coordinates"""
         x = (x * self.scale) + self.tx
         y = self.sizey - ((y * self.scale) + self.ty)
-        return (x, y)
+        return x, y
 
     def t_(self, x, y):
         """transform screen coordinates to data coordinates"""
         x = (x - self.tx) / self.scale
         y = (self.sizey - y - self.ty) / self.scale
-        return (x, y)
+        return x, y
 
     def print_help(self, event):
         print (HELP)
@@ -107,8 +106,8 @@ class dcelVis(Tk):
 
         d_x = maxx - minx
         d_y = maxy - miny
-        c_x = minx + (d_x) / 2
-        c_y = miny + (d_y) / 2
+        c_x = minx + d_x / 2
+        c_y = miny + d_y / 2
 
         if d_x > d_y:
             self.scale = (self.sizex * 0.8) / d_x
