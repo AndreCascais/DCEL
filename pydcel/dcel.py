@@ -282,7 +282,7 @@ class DCEL(object):
         elif direction == 'r':
             # new_h_hedge fica abaixo
             new_j_hedge.setTopology(old_vert, new_j_twin_hedge, hedge.incidentFace, new_hedge, hedge.previous)
-            new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.next)
+            new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.previous)
             
             # Update pointers between edges
             
