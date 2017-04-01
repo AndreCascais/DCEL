@@ -73,10 +73,10 @@ class dcelVis(Tk):
         return x, y
 
     def print_help(self, event):
-        print (HELP)
+        print(HELP)
 
     def print_dcel(self, event):
-        print (self.D)
+        print(self.D)
 
     def bind_dcel(self, dcel):
         minx = maxx = dcel.vertexList[0].x

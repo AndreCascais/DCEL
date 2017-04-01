@@ -4,7 +4,7 @@ DAT_FLAG_DOE = False
 
 
 def ply2datadict(infile):
-    """collect vertex coordinates and normals from input file"""
+    """collect vertex coordinates from input file"""
     datadict = {'coords': [], 'faces': []}
 
     with open(infile) as f:
@@ -37,41 +37,42 @@ def ply2datadict(infile):
 
 
 def datadict2dcel(datadict):
-    print (datadict)
+    print(datadict)
 
-    # assume ccw vertex order
-
-    D = dcel.DCEL()
-    int_face = D.createFace()
-    inf_face = D.createInfFace()
+    polygon = dcel.DCEL()
+    int_face = polygon.createFace()
+    inf_face = polygon.createInfFace()
 
     offset = 0
     first_twin = len(datadict['faces'][0])
     
     for coord in datadict['coords']:
-        D.createVertex(coord[0], coord[1])
+        polygon.createVertex(coord[0], coord[1])
 
     for face in datadict['faces']:
         n_vertex_in_face = len(face)
+
         # create hedges incident to the interior face
-        for hedge in face:
-            D.createHedge()
+        for _ in face:
+            polygon.createHedge()
         # create twin hedges incident to infinite face
-        for hedge in face:
-            D.createHedge()
+        for _ in face:
+            polygon.createHedge()
+
         for index in range(len(face)):
     
-            D.hedgeList[offset + index].setTopology(D.vertexList[face[index]], D.hedgeList[offset + n_vertex_in_face + index], int_face, D.hedgeList[offset + (index + 1) % n_vertex_in_face], D.hedgeList[offset + (index - 1) % n_vertex_in_face])
+            polygon.hedgeList[offset + index].setTopology(polygon.vertexList[face[index]], polygon.hedgeList[offset + n_vertex_in_face + index], int_face, polygon.hedgeList[offset + (index + 1) % n_vertex_in_face], polygon.hedgeList[offset + (index - 1) % n_vertex_in_face])
 
-            D.vertexList[face[index]].incidentEdge = D.hedgeList[offset + index]
+            polygon.vertexList[face[index]].incidentEdge = polygon.hedgeList[offset + index]
             
-            D.hedgeList[offset + n_vertex_in_face + index].setTopology(D.vertexList[face[(index + 1) % n_vertex_in_face]], D.hedgeList[offset + index], inf_face, D.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face], D.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
+            polygon.hedgeList[offset + n_vertex_in_face + index].setTopology(polygon.vertexList[face[(index + 1) % n_vertex_in_face]], polygon.hedgeList[offset + index], inf_face, polygon.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face], polygon.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
             
         offset += 2 * n_vertex_in_face
-    int_face.setTopology(D.hedgeList[0])
-    inf_face.setTopology(D.hedgeList[first_twin])
 
-    return D
+    int_face.setTopology(polygon.hedgeList[0])
+    inf_face.setTopology(polygon.hedgeList[first_twin])
+
+    return polygon
 
 
 def ply2dcel(infile):
