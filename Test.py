@@ -54,8 +54,8 @@ else:
 
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
-d.separateHedges('h')
-d.horizontalSweep()
+# d.separateHedges('h')
+# d.horizontalSweep()
 # d.renameFaces()
 
 print("Horizontal done")
