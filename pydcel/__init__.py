@@ -1,3 +1,4 @@
-from .dcel import *
-from .interface import dcelVis
+import dcel
 import io
+from .interface import dcelVis
+

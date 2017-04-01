@@ -38,26 +38,27 @@ def ply2datadict(infile):
 
 def datadict2dcel(datadict):
     print (datadict)
+
     # assume ccw vertex order
-    hedges = {}  # he_id: (v_origin, v_end), f, nextedge, prevedge
-    vertices = {}  # v_id: (e0,...,en) i.e. the edges originating from this v
 
     D = dcel.DCEL()
     int_face = D.createFace()
     inf_face = D.createInfFace()
+
     offset = 0
     first_twin = len(datadict['faces'][0])
     
     for coord in datadict['coords']:
         D.createVertex(coord[0], coord[1])
+
     for face in datadict['faces']:
         n_vertex_in_face = len(face)
         # create hedges incident to the interior face
         for hedge in face:
-            new_hedge = D.createHedge()
+            D.createHedge()
         # create twin hedges incident to infinite face
         for hedge in face:
-            new_hedge_twin = D.createHedge()
+            D.createHedge()
         for index in range(len(face)):
     
             D.hedgeList[offset + index].setTopology(D.vertexList[face[index]], D.hedgeList[offset + n_vertex_in_face + index], int_face, D.hedgeList[offset + (index + 1) % n_vertex_in_face], D.hedgeList[offset + (index - 1) % n_vertex_in_face])
