@@ -1,16 +1,14 @@
 import pydcel
 import sys
 import readline
+from os import listdir
 
 try:
     input = raw_input
 except NameError:
     pass
 
-file_list = ['colinear.ply', 'colinearVertical.ply', 'hGrid.ply',
-             'lTest.ply', 'mygrid.ply', 'mygrid2.ply', 'ricTest.ply',
-             'ricTestColinear.ply', 'squares.ply', 'simplegeom.ply']
-
+file_list = listdir("sampledata")
 
 class SimpleCompleter(object):
     
@@ -58,16 +56,16 @@ d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
 d.separateHedges('h')
 d.horizontalSweep()
-d.renameFaces()
+# d.renameFaces()
 
-print ("Horizontal done")
+print("Horizontal done")
 
 # if pydcel.io.DAT_FLAG_DOE:
 #     d.separateHedges('v')
 #     d.verticalSweep()
 #     d.renameFaces()
 
-# print ("Vertical done")
+# print("Vertical done")
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()
