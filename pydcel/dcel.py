@@ -268,31 +268,17 @@ class DCEL(object):
         new_j_twin_hedge = self.createHedge()
 
         if direction == 'l' or direction == 'u':
-            # new_j_hedge -> above hedge
             new_j_hedge.setTopology(new_vert, new_j_twin_hedge, hedge.incidentFace, hedge, new_hedge)
             new_j_twin_hedge.setTopology(old_vert, new_j_hedge, hedge.incidentFace, new_hedge.next, hedge.previous)
         
-            # Updates
+            # Update pointers between edges
         
             hedge.previous.next = new_j_twin_hedge
             hedge.previous = new_j_hedge
         
             new_hedge.next.previous = new_j_twin_hedge
             new_hedge.next = new_j_hedge
-        elif direction == 'r':
-            # new_h_hedge fica abaixo
-            new_j_hedge.setTopology(old_vert, new_j_twin_hedge, hedge.incidentFace, new_hedge, hedge.previous)
-            new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.previous)
-            
-            # Update pointers between edges
-            
-            hedge.previous.next = new_j_hedge
-            hedge.previous = new_j_twin_hedge
-            
-            new_hedge.previous.next = new_j_twin_hedge
-            new_hedge.previous = new_j_hedge
-        elif direction == 'd':
-            # new_j_edge -> right
+        elif direction == 'r' or direction == 'd':
             new_j_hedge.setTopology(old_vert, new_j_twin_hedge, hedge.incidentFace, new_hedge, hedge.previous)
             new_j_twin_hedge.setTopology(new_vert, new_j_hedge, hedge.incidentFace, hedge, new_hedge.previous)
 
