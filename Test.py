@@ -1,21 +1,60 @@
 import pydcel
 import sys
+import readline
+
+try:
+    input = raw_input
+except NameError:
+    pass
+
+file_list = ['colinear.ply', 'colinearVertical.ply', 'hGrid.ply',
+             'lTest.ply', 'mygrid.ply', 'mygrid2.ply', 'ricTest.ply',
+             'ricTestColinear.ply', 'squares.ply', 'simplegeom.ply']
+
+
+class SimpleCompleter(object):
+    
+    def __init__(self, options):
+        self.options = sorted(options)
+        return
+
+    def complete(self, text, state):
+        response = None
+        if state == 0:
+            # This is the first time for this text, so build a match list.
+            if text:
+                self.matches = [s 
+                                for s in self.options
+                                if s and s.startswith(text)]
+            else:
+                self.matches = self.options[:]
+        
+        # Return the state'th item from the match list,
+        # if we have that many.
+        try:
+            response = self.matches[state]
+        except IndexError:
+            response = None
+        return response
+
+# Register our completer function
+readline.set_completer(SimpleCompleter(file_list).complete)
+
+# Use the tab key for completion
+readline.parse_and_bind('tab: complete')
+
 
 if len(sys.argv) == 2:
     chosen_file = sys.argv[1]
 
 else:
-    file_list = ['sampledata/colinear.ply', 'sampledata/colinearVertical.ply', 'sampledata/hGrid.ply',
-                 'sampledata/lTest.ply', 'sampledata/mygrid.ply', 'sampledata/mygrid2.ply', 'sampledata/ricTest.ply',
-                 'sampledata/ricTestColinear.ply', 'sampledata/squares.ply', 'sampledata/simplegeom.ply']
-
     for f in file_list:
         print(f)
     print("")
 
     chosen_file = input("which file do you want: ",)
 
-d = pydcel.io.ply2dcel(chosen_file)
+d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 d.horizontalSweep()
 
 d.separateHedges('h')
@@ -30,10 +69,5 @@ print ("Horizontal done")
 
 print ("Vertical done")
 
-# change in dcel
-# gui.draw_dcel()
-# gui.update()
-# sleep(x)
-
-gui = pydcel.dcelVis(d)
-gui.mainloop()
+GUI = pydcel.dcelVis(d)
+GUI.mainloop()

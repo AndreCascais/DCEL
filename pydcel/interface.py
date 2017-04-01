@@ -10,13 +10,6 @@ try:
 except ImportError:
     from tkinter import *
 
-try:
-    from pyflann import FLANN
-    WITH_FLANN = True
-except ImportError:
-    print("couldn't import pyflann")
-    WITH_FLANN = False
-
 HELP = """
 q - quit
 h - print help message
@@ -51,10 +44,6 @@ class dcelVis(Tk):
         self.canvas = Canvas(self, bg="white", width=self.sizex, height=self.sizey)
         self.canvas.pack()
 
-        if WITH_FLANN:
-            self.bind("<ButtonRelease>", self.remove_closest)
-            self.bind("<Motion>", self.report_closest)
-
         self.coordstext = self.canvas.create_text(self.sizex, self.sizey, anchor='se', text='')
         self.info_text = self.canvas.create_text(10, self.sizey, anchor='sw', text='')
 
@@ -66,8 +55,6 @@ class dcelVis(Tk):
 
         self.draw = draw(self)
 
-        if WITH_FLANN:
-            self.kdtree = FLANN()
         self.D = None
         self.bind_dcel(dcel)
         self.print_help(None)
