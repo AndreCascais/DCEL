@@ -131,11 +131,11 @@ class DCEL(object):
         self.infiniteFace = None
         self.eventList = []
 
-    def getNewId(self, L):
-        if len(L) == 0:
+    def getNewId(self, list):
+        if len(list) == 0:
             return 0
         else:
-            return L[-1].identifier + 1
+            return list[-1].identifier + 1
 
     def createVertex(self, px, py):
         identifier = self.getNewId(self.vertexList)
@@ -202,17 +202,19 @@ class DCEL(object):
     def separateHedges(self, direction):
         """
         separates vertical and horizontal edges
-        the ones chosen didnt had the incident face being inf
+        ignore the ones whose incident face is the infinite face
         """
         self.eventList = []
         events = []
         for i in self.hedgeList:
             if i.incidentFace.identifier != "i":
                 events.append(i)
+
         if direction == 'h':
-            events = sorted(events, key=lambda x: (x.origin.y, x.origin.x), reverse=True)
+            events = sorted(events, key=lambda h: (h.origin.y, h.origin.x), reverse=True)
         else:
-            events = sorted(events, key=lambda x: (x.origin.x, -x.origin.y), reverse=True)
+            events = sorted(events, key=lambda h: (h.origin.x, -h.origin.y), reverse=True)
+
         l = []
         for i in events:
             if l == [] or (l[0].origin.y == i.origin.y and direction == 'h') or (l[0].origin.x == i.origin.x and direction == 'v'):

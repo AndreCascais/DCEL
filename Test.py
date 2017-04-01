@@ -55,11 +55,11 @@ else:
     chosen_file = input("which file do you want: ",)
 
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
-d.horizontalSweep()
 
 d.separateHedges('h')
 d.horizontalSweep()
 d.renameFaces()
+
 print ("Horizontal done")
 
 # if pydcel.io.DAT_FLAG_DOE:
@@ -67,7 +67,7 @@ print ("Horizontal done")
 #     d.verticalSweep()
 #     d.renameFaces()
 
-print ("Vertical done")
+# print ("Vertical done")
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()
