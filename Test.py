@@ -55,17 +55,21 @@ else:
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
 d.separateHedges('h')
+
+for i in d.eventList:
+    print(i[0].origin.y, i)
+
 d.horizontalSweep()
 d.renameFaces()
 
 print("Horizontal done")
 
-# if pydcel.io.DAT_FLAG_DOE:
-#     d.separateHedges('v')
-#     d.verticalSweep()
-#     d.renameFaces()
+if pydcel.io.DAT_FLAG_DOE:
+    d.separateHedges('v')
+    d.verticalSweep()
+    d.renameFaces()
 
-# print("Vertical done")
+print("Vertical done")
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()

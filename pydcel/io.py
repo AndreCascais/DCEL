@@ -1,6 +1,6 @@
 from . import dcel
 
-DAT_FLAG_DOE = False
+DAT_FLAG_DOE = True
 
 
 def ply2datadict(infile):
@@ -10,7 +10,7 @@ def ply2datadict(infile):
     with open(infile) as f:
         line = f.readline()
 
-        if int(line) == 1:
+        if int(line) == 0:
             global DAT_FLAG_DOE
             DAT_FLAG_DOE = True
 
