@@ -225,10 +225,10 @@ class DCEL(object):
         self.eventList.append(l)
 
     def divideHedge(self, hedge, point, direction):
-        
+
         new_vert = self.createVertex(point.x, point.y)
         print("I've just create a new vert", new_vert)
-        
+
         # Break incident edge in two
         new_hedge = self.createHedge()
         new_twin_hedge = self.createHedge()
@@ -261,6 +261,8 @@ class DCEL(object):
             
             hedge.twin.previous.next = new_twin_hedge
             hedge.twin.previous = new_twin_hedge
+
+        return new_vert
 
     def joinHedges(self, hedge, new_hedge, old_vert, new_vert, direction):
         # Join new hedge
@@ -310,7 +312,7 @@ class DCEL(object):
                     
             # another to close/expand them
             for hedge in l:
-                print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.y)
+                print("Sweeping line now is :", sweeping_line, "on ", hedge.origin.y, "and i'm on event", hedge)
                 my_dir = hedge.getDirection()
                 prev_dir = hedge.previous.getDirection()
 
@@ -343,9 +345,8 @@ class DCEL(object):
                                 new_vert = left_hedge.next.origin
                             else:
                                 coords = left_hedge.findIntersection(old_vert)
-                                new_vert = self.createVertex(coords.x, coords.y)
-                                print("I've just create a new vert", new_vert)
-                                self.divideHedge(left_hedge, coords, 'd')
+
+                                new_vert = self.divideHedge(left_hedge, coords, 'd')
                                 new_v_hedge = left_hedge.previous
                                 
                             self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'l')
@@ -356,10 +357,10 @@ class DCEL(object):
                         if right_hedge.getDirection() == 'u':
                             old_vert = hedge.origin
                             coords = right_hedge.findIntersection(old_vert)
-                            new_vert = self.createVertex(coords.x, coords.y)
-                            print("I've just create a new vert", new_vert)
-                            self.divideHedge(right_hedge, coords, 'u')
+
+                            new_vert = self.divideHedge(right_hedge, coords, 'u')
                             new_v_hedge = right_hedge.next
+
                             self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'r')
 
     def verticalSweep(self):
