@@ -26,11 +26,13 @@ f - iterate through faces
 class dcelVis(Tk):
     def __init__(self, dcel):
         Tk.__init__(self)
-        self.sizex = 700
-        self.sizey = 700
+        self.sizex = 900
+        self.sizey = 900
         self.window_diagonal = math.sqrt(self.sizex ** 2 + self.sizey ** 2)
         self.title("DCELvis")
         self.resizable(0, 0)
+
+        self.bind('<Motion>', self.coords)
 
         self.bind('q', self.exit)
         self.bind('h', self.print_help)
@@ -60,6 +62,10 @@ class dcelVis(Tk):
         self.print_help(None)
         self.hedge = dcel.hedgeList[-1].previous
 
+    def coords(self, event):
+        s = str(self.t_(event.x,event.y))
+        self.canvas.itemconfig(self.info_text, text=s)
+
     def t(self, x, y):
         """transform data coordinates to screen coordinates"""
         x = (x * self.scale) + self.tx
@@ -70,7 +76,7 @@ class dcelVis(Tk):
         """transform screen coordinates to data coordinates"""
         x = (x - self.tx) / self.scale
         y = (self.sizey - y - self.ty) / self.scale
-        return x, y
+        return int(round(x)), int(round(y))
 
     def print_help(self, event):
         print(HELP)
