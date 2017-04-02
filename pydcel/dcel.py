@@ -130,6 +130,7 @@ class DCEL(object):
         self.faceList = []
         self.infiniteFace = None
         self.eventList = []
+        self.vertexSet = set()
 
     def getNewId(self, list):
         if len(list) == 0:
@@ -141,6 +142,7 @@ class DCEL(object):
         identifier = self.getNewId(self.vertexList)
         v = vertex(px, py, identifier)
         self.vertexList.append(v)
+        self.vertexSet.add(Point(px,py))
         return v
         
     def createHedge(self):
@@ -346,10 +348,13 @@ class DCEL(object):
                             else:
                                 coords = left_hedge.findIntersection(old_vert)
 
+                                if coords in self.vertexSet:
+                                    break
+
                                 new_vert = self.divideHedge(left_hedge, coords, 'd')
                                 new_v_hedge = left_hedge.previous
                                 
-                            self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'l')
+                            # self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'l')
 
                     if 'r' in possible_dirs and hedge.origin.x < sweeping_line.max_item()[0]:
                         right_hedge = sweeping_line.ceiling_item(hedge.origin.x + 1)[1]
@@ -358,10 +363,13 @@ class DCEL(object):
                             old_vert = hedge.origin
                             coords = right_hedge.findIntersection(old_vert)
 
+                            if coords in self.vertexSet:
+                                break
+
                             new_vert = self.divideHedge(right_hedge, coords, 'u')
                             new_v_hedge = right_hedge.next
 
-                            self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'r')
+                            # self.joinHedges(hedge, new_v_hedge, old_vert, new_vert, 'r')
 
     def verticalSweep(self):
 
