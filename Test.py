@@ -2,6 +2,7 @@ import pydcel
 import sys
 import readline
 from os import listdir
+import numpy as np
 
 try:
     input = raw_input
@@ -55,8 +56,10 @@ else:
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
 d.separateHedges('h')
-d.horizontalSweep()
-d.renameFaces()
+d.hedgesToSegments()
+d.computeVertexVisibility()
+#d.horizontalSweep()
+#d.renameFaces()
 
 print("Horizontal done")
 

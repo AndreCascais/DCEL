@@ -2,11 +2,11 @@ from __future__ import print_function
 import numpy as np
 from bintrees import AVLTree
 import copy
+from segments import *
 from collections import namedtuple
 
 Point = namedtuple('Point', ['x', 'y'])
-
-
+        
 class vertex(object):
     
     def __init__(self, px, py, identifier):
@@ -21,6 +21,9 @@ class vertex(object):
         
     def p(self):
         return self.x, self.y
+    
+    def toPoint(self):
+        return Point(self.x, self.y)
 
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
@@ -101,6 +104,11 @@ class hedge(object):
         elif direction == 'd':
             return self.getDirection() == 'r'
 
+    def toSegment(self):
+        src = self.origin.toPoint()
+        dest = self.next.origin.toPoint()
+        return Segment(src, dest)
+
 
 class face(object):
     
@@ -121,7 +129,6 @@ class face(object):
         # return "face( innerComponent-{}, outerComponent-{} )".format(self.outerComponent, self.innerComponent)
         return "f{}".format(self.identifier)
 
-
 class DCEL(object):
     
     def __init__(self):
@@ -131,7 +138,26 @@ class DCEL(object):
         self.infiniteFace = None
         self.eventList = []
         self.vertexSet = set()
-
+        self.segmentList = SegmentList()
+        self.vertexVisibility = None
+        self.faceVisibility = None
+        
+    def computeVertexVisibility(self):
+        dim = len(self.vertexList)
+        self.vertexVisibility = np.zeros((dim, dim))
+        for i in range(dim):
+            for j in range(i + 1):
+                segment = Segment(self.vertexList[i].toPoint(), self.vertexList[j].toPoint())
+                if (not self.segmentList.canIntersect(segment)):
+                    self.vertexVisibility[i, j] = 1
+        print (self.vertexVisibility)
+        
+    def hedgesToSegments(self):
+        for i in self.eventList:
+            for j in i:
+                segment = j.toSegment()
+                self.segmentList.addSegment(segment)
+    
     def getNewId(self, list):
         if len(list) == 0:
             return 0
@@ -481,3 +507,5 @@ class DCEL(object):
                                 new_h_hedge = up_hedge.previous
                                 
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'u')
+        
+        

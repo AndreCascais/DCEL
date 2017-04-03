@@ -26,8 +26,8 @@ f - iterate through faces
 class dcelVis(Tk):
     def __init__(self, dcel):
         Tk.__init__(self)
-        self.sizex = 900
-        self.sizey = 900
+        self.sizex = 700
+        self.sizey = 700
         self.window_diagonal = math.sqrt(self.sizex ** 2 + self.sizey ** 2)
         self.title("DCELvis")
         self.resizable(0, 0)
