@@ -428,6 +428,8 @@ class DCEL(object):
                     except KeyError:
                         sweeping_line.insert(hedge.previous.origin.y, [hedge.previous])
 
+            to_be_removed = set()
+
             # another to close/expand them
             for hedge in l:
                 print("Sweeping Line :", sweeping_line, "on x:", hedge.origin.x, "on y:,", hedge.origin.y, "and event", hedge)
@@ -438,8 +440,7 @@ class DCEL(object):
                 if my_dir == 'r':
                     print("hedge {} is trying to remove {}".format(hedge, hedge.origin.y))
 
-                    # # check whether hedge is removing itself
-                    # if not hedge == sweeping_line.get_value(hedge.origin.y)[0] or not hedge == sweeping_line.get_value(hedge.origin.y)[-1]:
+                    to_be_removed.add(hedge.origin.y)
 
                     if len(sweeping_line.get_value(hedge.origin.y)) == 1:
                         sweeping_line.remove(hedge.origin.y)
@@ -449,13 +450,12 @@ class DCEL(object):
                 elif prev_dir == 'l':
                     print("hedge {} is trying to remove {}".format(hedge, hedge.previous.origin.y))
 
-                    # # check whether hedge is removing itself
-                    # if not hedge == sweeping_line.get_value(hedge.origin.y)[0] or not hedge == sweeping_line.get_value(hedge.origin.y)[-1]:
+                    to_be_removed.add(hedge.previous.origin.y)
 
-                    if len(sweeping_line.get_value(hedge.origin.y)) == 1:
+                    if len(sweeping_line.get_value(hedge.previous.origin.y)) == 1:
                         sweeping_line.remove(hedge.previous.origin.y)
                     else:
-                        del sweeping_line.get_value(hedge.origin.y)[0]
+                        del sweeping_line.get_value(hedge.previous.origin.y)[0]
 
                 print("Sweeping before expanding/after closing:", sweeping_line)
 
@@ -484,17 +484,24 @@ class DCEL(object):
                                 print("I'm hedge {}, and i'm actually going DOWN".format(hedge))
 
                                 old_vert = hedge.origin
-                                coords = down_hedge.findIntersection(old_vert)
 
-                                if coords not in self.vertexSet:
+                                if down_hedge.next.origin.x == hedge.origin.x:
+                                    print("%%%%%Case one%%%%%")
+                                    print("uh", down_hedge, "h", hedge)
+                                    new_h_hedge = down_hedge
+                                    new_vert = down_hedge.next.origin
+                                else:
+                                    coords = down_hedge.findIntersection(old_vert)
+
                                     new_vert = self.divideHedge(down_hedge, coords, 'r')
                                     new_h_hedge = down_hedge.next
-                                    self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'd')
 
-                                    hedge = down_hedge.twin
+                                self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'd')
 
-                                    if hedge.incidentFace == self.infiniteFace:
-                                        break
+                                hedge = down_hedge.twin
+
+                                if hedge.incidentFace == self.infiniteFace:
+                                    break
                             else:
                                 break
 
@@ -531,9 +538,8 @@ class DCEL(object):
                                 else:
                                     coords = up_hedge.findIntersection(old_vert)
 
-                                    if coords not in self.vertexSet:
-                                        new_vert = self.divideHedge(up_hedge, coords, 'l')
-                                        new_h_hedge = up_hedge.previous
+                                    new_vert = self.divideHedge(up_hedge, coords, 'l')
+                                    new_h_hedge = up_hedge.previous
 
                                 self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'u')
 
