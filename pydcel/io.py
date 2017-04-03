@@ -1,6 +1,6 @@
 from . import dcel
 
-DAT_FLAG_DOE = False
+DAT_FLAG_DOE = True
 
 
 def ply2datadict(infile):
@@ -10,7 +10,7 @@ def ply2datadict(infile):
     with open(infile) as f:
         line = f.readline()
 
-        if int(line) == 1:
+        if int(line) == 0:
             global DAT_FLAG_DOE
             DAT_FLAG_DOE = True
 
@@ -21,7 +21,7 @@ def ply2datadict(infile):
             datadict['coords'].append([float(x), float(y)])
         vertex_ids = [x for x in range(int(vertexcount))]
         datadict['faces'].append(vertex_ids)
-            
+
         holecount = int(f.readline())
         if holecount != 0:
             for i in range(holecount):
@@ -45,7 +45,7 @@ def datadict2dcel(datadict):
 
     offset = 0
     first_twin = len(datadict['faces'][0])
-    
+
     for coord in datadict['coords']:
         polygon.createVertex(coord[0], coord[1])
 
@@ -60,13 +60,13 @@ def datadict2dcel(datadict):
             polygon.createHedge()
 
         for index in range(len(face)):
-    
+
             polygon.hedgeList[offset + index].setTopology(polygon.vertexList[face[index]], polygon.hedgeList[offset + n_vertex_in_face + index], int_face, polygon.hedgeList[offset + (index + 1) % n_vertex_in_face], polygon.hedgeList[offset + (index - 1) % n_vertex_in_face])
 
             polygon.vertexList[face[index]].incidentEdge = polygon.hedgeList[offset + index]
-            
+
             polygon.hedgeList[offset + n_vertex_in_face + index].setTopology(polygon.vertexList[face[(index + 1) % n_vertex_in_face]], polygon.hedgeList[offset + index], inf_face, polygon.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face], polygon.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
-            
+
         offset += 2 * n_vertex_in_face
 
     int_face.setTopology(polygon.hedgeList[0])

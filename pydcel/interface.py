@@ -63,7 +63,7 @@ class dcelVis(Tk):
         self.hedge = dcel.hedgeList[-1].previous
 
     def coords(self, event):
-        s = str(self.t_(event.x,event.y))
+        s = str(self.t_(event.x, event.y))
         self.canvas.itemconfig(self.info_text, text=s)
 
     def t(self, x, y):

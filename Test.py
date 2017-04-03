@@ -55,20 +55,32 @@ else:
 
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
+print("-------------HORIZONTAL EVENTLIST------------")
 d.separateHedges('h')
-d.hedgesToSegments()
-d.computeVertexVisibility()
-#d.horizontalSweep()
-#d.renameFaces()
+for i in d.eventList:
+    print(i[0].origin.y, i)
+print("---------------------------------------------")
 
-print("Horizontal done")
+d.horizontalSweep()
 
-# if pydcel.io.DAT_FLAG_DOE:
-#     d.separateHedges('v')
-#     d.verticalSweep()
-#     d.renameFaces()
+print("-------------HORIZONTAL FACES-----------")
+d.renameFaces()
 
-# print("Vertical done")
+print("-------------HORIZONTAL DONE------------")
+
+if pydcel.io.DAT_FLAG_DOE:
+
+    print("-------------VERTICAL EVENTLIST------------")
+    d.separateHedges('v')
+    for i in d.eventList:
+        print(i[0].origin.y, i)
+    print("-------------------------------------------")
+
+    d.verticalSweep()
+    print("-------------VERTICAL FACES------------")
+    d.renameFaces()
+
+print("-------------VERTICAL DONE------------")
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()
