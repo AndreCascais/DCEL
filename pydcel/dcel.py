@@ -428,7 +428,7 @@ class DCEL(object):
                     except KeyError:
                         sweeping_line.insert(hedge.previous.origin.y, [hedge.previous])
 
-            to_be_removed = set()
+            to_be_removed = []
 
             # another to close/expand them
             for hedge in l:
@@ -440,27 +440,22 @@ class DCEL(object):
                 if my_dir == 'r':
                     print("hedge {} is trying to remove {}".format(hedge, hedge.origin.y))
 
-                    to_be_removed.add(hedge.origin.y)
-
-                    if len(sweeping_line.get_value(hedge.origin.y)) == 1:
-                        sweeping_line.remove(hedge.origin.y)
-                    else:
-                        del sweeping_line.get_value(hedge.origin.y)[0]
+                    to_be_removed.append(hedge.origin.y)
 
                 elif prev_dir == 'l':
                     print("hedge {} is trying to remove {}".format(hedge, hedge.previous.origin.y))
 
-                    to_be_removed.add(hedge.previous.origin.y)
-
-                    if len(sweeping_line.get_value(hedge.previous.origin.y)) == 1:
-                        sweeping_line.remove(hedge.previous.origin.y)
-                    else:
-                        del sweeping_line.get_value(hedge.previous.origin.y)[0]
+                    to_be_removed.append(hedge.previous.origin.y)
 
                 print("Sweeping before expanding/after closing:", sweeping_line)
 
-                # expand
+            # another cycle to expand hedges
+            for hedge in l:
                 if not sweeping_line.is_empty():  # only try to expand if sweeping line is not empty
+
+                    my_dir = hedge.getDirection()
+                    prev_dir = hedge.previous.getDirection()
+
                     possible_dirs = ['u', 'd']
                     if my_dir == 'u' or prev_dir == 'd':
                         possible_dirs.remove('u')
@@ -512,10 +507,10 @@ class DCEL(object):
                         tmp_hedge = hedge
                         while True:
 
-                            if len(sweeping_line.ceiling_item(hedge.origin.y + 1)[1]) == 1:
-                                up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][0]
-                            else:
-                                up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][1]
+                            # if len(sweeping_line.ceiling_item(hedge.origin.y + 1)[1]) == 1:
+                            #     up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][0]
+                            # else:
+                            up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][-1]
 
                             print("I {} am trying to go up into {}".format(hedge, up_hedge))
 
@@ -551,3 +546,11 @@ class DCEL(object):
                                 break
 
                         hedge = tmp_hedge
+
+            for h in to_be_removed:
+                print("i'm removing hedge", h)
+
+                if len(sweeping_line.get_value(h)) == 1:
+                    sweeping_line.remove(h)
+                else:
+                    del sweeping_line.get_value(h)[0]
