@@ -8,23 +8,23 @@ Point = namedtuple('Point', ['x', 'y'])
 
 
 class vertex(object):
-    
+
     def __init__(self, px, py, identifier):
         self.identifier = identifier
         self.x = px
         self.y = py
         self.incidentEdge = None
         self.isReflex = False
-        
+
     def setTopology(self, newIncedentEdge):
         self.incidentEdge = newIncedentEdge
-        
+
     def p(self):
         return self.x, self.y
 
     def __repr__(self):
         return "v{} ({}, {})".format(self.identifier, self.x, self.y)
-    
+
     def checkReflex(self):
         prev = self.incidentEdge.previous.origin
         post = self.incidentEdge.next.origin
@@ -40,7 +40,7 @@ class vertex(object):
 
 
 class hedge(object):
-    
+
     def __init__(self, identifier):
         self.identifier = identifier
         self.origin = None
@@ -55,7 +55,7 @@ class hedge(object):
         self.incidentFace = newIncindentFace
         self.next = newNext
         self.previous = newPrevious
-        
+
     def loop(self):
         """Loop from this hedge to the next ones. Stops when we are at the current one again."""
         yield self
@@ -63,7 +63,7 @@ class hedge(object):
         while e is not self:
             yield e
             e = e.next
-            
+
     def wind(self):
         """iterate over hedges emerging from vertex at origin in ccw order"""
         yield self
@@ -84,7 +84,7 @@ class hedge(object):
             return 'd'
         elif self.origin.y < self.next.origin.y:
             return 'u'
-        
+
     def findIntersection(self, vertex):
         # Check whether self is horizontal or vertical
         if self.origin.y == self.next.origin.y:  # self is horizontal
@@ -94,7 +94,7 @@ class hedge(object):
             x = self.origin.x
             y = vertex.y
         return Point(x, y)
-    
+
     def isTwinBlocking(self, direction):
         if direction == 'u':  # if i go left my twin goes right and is above me -> blocks
             return self.getDirection() == 'l'
@@ -103,7 +103,7 @@ class hedge(object):
 
 
 class face(object):
-    
+
     def __init__(self, identifier):
         self.identifier = identifier
         self.outerComponent = None
@@ -112,7 +112,7 @@ class face(object):
     def setTopology(self, newOuterComponent, newInnerComponent=None):
         self.outerComponent = newOuterComponent
         self.innerComponent = newInnerComponent
-        
+
     def loopOuterVertices(self):
         for e in self.outerComponent.loop():
             yield e.origin
@@ -123,7 +123,7 @@ class face(object):
 
 
 class DCEL(object):
-    
+
     def __init__(self):
         self.vertexList = []
         self.hedgeList = []
@@ -132,25 +132,25 @@ class DCEL(object):
         self.eventList = []
         self.vertexSet = set()
 
-    def getNewId(self, list):
-        if len(list) == 0:
+    def getNewId(self, a_list):
+        if len(a_list) == 0:
             return 0
         else:
-            return list[-1].identifier + 1
+            return a_list[-1].identifier + 1
 
     def createVertex(self, px, py):
         identifier = self.getNewId(self.vertexList)
         v = vertex(px, py, identifier)
         self.vertexList.append(v)
-        self.vertexSet.add(Point(px,py))
+        self.vertexSet.add(Point(px, py))
         return v
-        
+
     def createHedge(self):
         identifier = self.getNewId(self.hedgeList)
         e = hedge(identifier)
         self.hedgeList.append(e)
         return e
-        
+
     def createFace(self):
         identifier = self.getNewId(self.faceList)
         f = face(identifier)
@@ -244,23 +244,23 @@ class DCEL(object):
             # new_vert.incidentEdge = hedge
 
             hedge.origin = new_vert
-            
+
             hedge.previous.next = new_hedge
             hedge.previous = new_hedge
-            
+
             hedge.twin.next.previous = new_twin_hedge
             hedge.twin.next = new_twin_hedge
 
         elif direction == 'u' or direction == 'r':
-        
+
             new_hedge.setTopology(new_vert, new_twin_hedge, hedge.incidentFace, hedge.next, hedge)
             new_twin_hedge.setTopology(hedge.twin.origin, new_hedge, hedge.twin.incidentFace, hedge.twin, hedge.twin.previous)
-        
+
             hedge.twin.origin = new_vert
-            
+
             hedge.next.previous = new_hedge
             hedge.next = new_hedge
-            
+
             hedge.twin.previous.next = new_twin_hedge
             hedge.twin.previous = new_twin_hedge
 
@@ -275,12 +275,12 @@ class DCEL(object):
         if direction == 'l' or direction == 'u':
             new_j_hedge.setTopology(new_vert, new_j_twin_hedge, hedge.incidentFace, hedge, new_hedge)
             new_j_twin_hedge.setTopology(old_vert, new_j_hedge, hedge.incidentFace, new_hedge.next, hedge.previous)
-        
+
             # Update pointers between edges
-        
+
             hedge.previous.next = new_j_twin_hedge
             hedge.previous = new_j_hedge
-        
+
             new_hedge.next.previous = new_j_twin_hedge
             new_hedge.next = new_j_hedge
 
@@ -299,9 +299,8 @@ class DCEL(object):
     def horizontalSweep(self):
 
         sweeping_line = AVLTree()
-        
-        for l in self.eventList:
 
+        for l in self.eventList:
 
             # one cycle to add hedges
             for hedge in l:
@@ -392,7 +391,7 @@ class DCEL(object):
     def verticalSweep(self):
 
         sweeping_line = AVLTree()
-        
+
         for l in self.eventList:
 
             print(l)
@@ -451,7 +450,7 @@ class DCEL(object):
                             sweeping_line.remove(hedge.previous.origin.y)
                         else:
                             del sweeping_line.get_value(hedge.origin.y)[0]
-                    
+
                 # print("Sweeping before expanding now is :", sweeping_line, "on ", hedge.origin.x)
 
                 # expand
@@ -504,13 +503,13 @@ class DCEL(object):
                         if up_hedge.getDirection() == 'l' and up_hedge.incidentFace == hedge.incidentFace:
                             old_vert = hedge.origin
                             if up_hedge.next.origin.x == hedge.origin.x:
-                                print ("Case one")
-                                print ("uh", up_hedge, "h", hedge)
+                                print("Case one")
+                                print("uh", up_hedge, "h", hedge)
                                 new_h_hedge = up_hedge
                                 new_vert = up_hedge.next.origin
                             elif up_hedge.origin.x == hedge.origin.x:
-                                print ("Case two")
-                                print ("uh", up_hedge, "h", hedge)
+                                print("Case two")
+                                print("uh", up_hedge, "h", hedge)
                                 new_h_hedge = up_hedge.previous
                                 new_vert = up_hedge.origin
                             else:
@@ -519,7 +518,7 @@ class DCEL(object):
                                 if coords not in self.vertexSet:
                                     new_vert = self.divideHedge(up_hedge, coords, 'l')
                                     new_h_hedge = up_hedge.previous
-                                
+
                             self.joinHedges(hedge, new_h_hedge, old_vert, new_vert, 'u')
 
                             # if up_hedge.twin.incidentFace != self.infiniteFace:

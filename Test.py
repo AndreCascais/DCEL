@@ -10,8 +10,9 @@ except NameError:
 
 file_list = listdir("sampledata")
 
+
 class SimpleCompleter(object):
-    
+
     def __init__(self, options):
         self.options = sorted(options)
         return
@@ -21,12 +22,12 @@ class SimpleCompleter(object):
         if state == 0:
             # This is the first time for this text, so build a match list.
             if text:
-                self.matches = [s 
+                self.matches = [s
                                 for s in self.options
                                 if s and s.startswith(text)]
             else:
                 self.matches = self.options[:]
-        
+
         # Return the state'th item from the match list,
         # if we have that many.
         try:
@@ -34,6 +35,7 @@ class SimpleCompleter(object):
         except IndexError:
             response = None
         return response
+
 
 # Register our completer function
 readline.set_completer(SimpleCompleter(file_list).complete)

@@ -59,11 +59,11 @@ class dcelVis(Tk):
 
         self.D = None
         self.bind_dcel(dcel)
-        self.print_help(None)
+        self.print_help()
         self.hedge = dcel.hedgeList[-1].previous
 
     def coords(self, event):
-        s = str(self.t_(event.x,event.y))
+        s = str(self.t_(event.x, event.y))
         self.canvas.itemconfig(self.info_text, text=s)
 
     def t(self, x, y):
@@ -78,10 +78,10 @@ class dcelVis(Tk):
         y = (self.sizey - y - self.ty) / self.scale
         return int(round(x)), int(round(y))
 
-    def print_help(self, event):
+    def print_help(self):
         print(HELP)
 
-    def print_dcel(self, event):
+    def print_dcel(self):
         print(self.D)
 
     def bind_dcel(self, dcel):
@@ -278,7 +278,7 @@ class dcelVis(Tk):
         # print x,y
         print(self.canvas.find_closest(x, y))
 
-    def exit(self, event):
+    def exit(self):
         print("bye bye.")
         self.quit()
         self.destroy()
