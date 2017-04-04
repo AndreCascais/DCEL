@@ -1,7 +1,7 @@
 from . import dcel
 
-GRID_PARTITION_FLAG = True
-
+GRID_PARTITION_FLAG = False
+VISIBILITY_FLAG = False
 
 def ply2datadict(infile):
     """collect vertex coordinates from input file"""
@@ -10,10 +10,12 @@ def ply2datadict(infile):
     with open(infile) as f:
         line = f.readline()
 
-        if int(line) == 0:
+        if int(line) >= 1:
             global GRID_PARTITION_FLAG
             GRID_PARTITION_FLAG = True
-
+        if int(line) == 2:
+            global VISIBILITY_FLAG
+            VISIBILITY_FLAG = True
         vertexcount = int(f.readline())
         for i in range(vertexcount):
             line = f.readline()

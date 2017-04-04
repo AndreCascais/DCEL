@@ -52,39 +52,23 @@ else:
     print("")
 
     chosen_file = input("which file do you want: ",)
-
+    
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
-
-print("-------------HORIZONTAL EVENTLIST------------")
 d.separateHedges('h')
-#for i in d.eventList:
-    #print(i[0].origin.y, i)
-print("---------------------------------------------")
 d.hedgesToSegments()
-
 d.horizontalSweep()
-
-print("-------------HORIZONTAL FACES-----------")
 d.renameFaces()
-
 print("-------------HORIZONTAL DONE------------")
-
 if pydcel.io.GRID_PARTITION_FLAG:
-
-    print("-------------VERTICAL EVENTLIST------------")
     d.separateHedges('v')
-    #for i in d.eventList:
-        #print(i[0].origin.y, i)
-    print("-------------------------------------------")
-
     d.verticalSweep()
-    print("-------------VERTICAL FACES------------")
     d.renameFaces()
 
 print("-------------VERTICAL DONE------------")
-d.computeVertexVisibility()
-d.computeFaceVisibility()
-print(d.faceVisibility)
+if (pydcel.io.VISIBILITY_FLAG):
+    d.computeVertexVisibility()
+    d.computeFaceVisibility()
+    d.printMatrix()
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()

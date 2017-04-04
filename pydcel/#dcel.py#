@@ -604,3 +604,4 @@ class DCEL(object):
                     sweeping_line.remove(h)
                 else:
                     del sweeping_line.get_value(h)[0]
+    
