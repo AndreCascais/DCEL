@@ -1,15 +1,17 @@
 param nV;
-/*  Number of vertex*/
+/* Number of vertexes*/
 
 param nF;
-/*  Number of faces*/
+/* Number of faces*/
 
 param nG;
 /* Number of guards*/
 
 set V := 0..(nV - 1);
 /* Set of vertex */
+
 set F := 0..(nF - 1);
+/* Set of faces */
 
 set M, within V cross F;
 /* Visibility Matrx -> for each vertex nF columns*/
