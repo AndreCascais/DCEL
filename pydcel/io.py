@@ -1,6 +1,6 @@
 from . import dcel
 
-DAT_FLAG_DOE = True
+GRID_PARTITION_FLAG = True
 
 
 def ply2datadict(infile):
@@ -11,8 +11,8 @@ def ply2datadict(infile):
         line = f.readline()
 
         if int(line) == 0:
-            global DAT_FLAG_DOE
-            DAT_FLAG_DOE = True
+            global GRID_PARTITION_FLAG
+            GRID_PARTITION_FLAG = True
 
         vertexcount = int(f.readline())
         for i in range(vertexcount):

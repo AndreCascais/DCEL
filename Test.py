@@ -69,7 +69,7 @@ d.renameFaces()
 
 print("-------------HORIZONTAL DONE------------")
 
-if pydcel.io.DAT_FLAG_DOE:
+if pydcel.io.GRID_PARTITION_FLAG:
 
     print("-------------VERTICAL EVENTLIST------------")
     d.separateHedges('v')
