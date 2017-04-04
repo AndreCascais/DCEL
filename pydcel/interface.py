@@ -59,7 +59,6 @@ class dcelVis(Tk):
 
         self.D = None
         self.bind_dcel(dcel)
-        self.print_help(None)
         self.hedge = dcel.hedgeList[-1].previous
 
     def coords(self, event):
@@ -123,25 +122,6 @@ class dcelVis(Tk):
         self.hedge_it = self.type_iterator('hedge')
         self.face_it = self.type_iterator('face')
         self.vertex_it = self.type_iterator('vertex')
-
-    def getClosestVertex(self, screenx, screeny):
-        vertices = [np.array([v.x, v.y]) for v in self.D.vertexList]
-        self.kdtree.build_index(np.array(vertices), algorithm='linear')
-
-        x, y = self.t_(screenx, screeny)
-        q = np.array([x, y])
-        v_i = self.kdtree.nn_index(q, 1)[0][0]
-
-        return self.D.vertexList[v_i]
-
-    def remove_closest(self, event):
-        v = self.getClosestVertex(event.x, event.y)
-        self.D.remove_vertex(v)
-        self.draw_dcel()
-
-    def report_closest(self, event):
-        s = str(self.getClosestVertex(event.x, event.y))
-        self.canvas.itemconfig(self.info_text, text=s)
 
     def iteratehedge(self, event):
         try:
@@ -271,12 +251,6 @@ class dcelVis(Tk):
         vlist = [(v.x, v.y) for v in f.loopOuterVertices()]
         return self.draw.polygon(vlist, **options)
 
-    def find_closest(self, event):
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
-        # print event.x, event.y
-        # print x,y
-        print(self.canvas.find_closest(x, y))
 
     def exit(self, event):
         print("bye bye.")
