@@ -406,9 +406,6 @@ class DCEL(object):
                             else:
                                 coords = left_hedge.findIntersection(old_vert)
 
-                                # if coords in self.vertexSet:
-                                #     break
-
                                 new_vert = self.divideHedge(left_hedge, coords, 'd')
                                 new_v_hedge = left_hedge.previous
 
@@ -423,9 +420,6 @@ class DCEL(object):
 
                             old_vert = hedge.origin
                             coords = right_hedge.findIntersection(old_vert)
-
-                            # if coords in self.vertexSet:
-                            #     break
 
                             new_vert = self.divideHedge(right_hedge, coords, 'u')
                             new_v_hedge = right_hedge.next
