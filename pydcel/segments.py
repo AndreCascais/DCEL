@@ -12,7 +12,8 @@ class Segment :
         o3 = orientation(seg.src, seg.dest, self.src)
         o4 = orientation(seg.src, seg.dest, self.dest)
 
-        if (o1 != o2 and o3 != o4):
+        if (o1 != o2 and o3 != o4 and 0 not in [o1, o2, o3, o4]): # 0 is for colinear, which we want to keep !
+            
             return True
         return False
         
@@ -27,7 +28,6 @@ class SegmentList:
     def canIntersect(self, seg):
         for i in self.list:
             if i.intersectsWith(seg):
-                print(i.src, i.dest, seg.src, seg.dest)
                 return True
         return False
 

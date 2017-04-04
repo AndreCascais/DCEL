@@ -37,7 +37,6 @@ def ply2datadict(infile):
 
 
 def datadict2dcel(datadict):
-    print(datadict)
 
     polygon = dcel.DCEL()
     int_face = polygon.createFace()

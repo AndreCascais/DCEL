@@ -11,8 +11,9 @@ except NameError:
 
 file_list = listdir("sampledata")
 
+
 class SimpleCompleter(object):
-    
+
     def __init__(self, options):
         self.options = sorted(options)
         return
@@ -22,12 +23,12 @@ class SimpleCompleter(object):
         if state == 0:
             # This is the first time for this text, so build a match list.
             if text:
-                self.matches = [s 
+                self.matches = [s
                                 for s in self.options
                                 if s and s.startswith(text)]
             else:
                 self.matches = self.options[:]
-        
+
         # Return the state'th item from the match list,
         # if we have that many.
         try:
@@ -35,6 +36,7 @@ class SimpleCompleter(object):
         except IndexError:
             response = None
         return response
+
 
 # Register our completer function
 readline.set_completer(SimpleCompleter(file_list).complete)
@@ -57,15 +59,21 @@ d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 
 print("-------------HORIZONTAL EVENTLIST------------")
 d.separateHedges('h')
-#for i in d.eventList:
-    #print(i[0].origin.y, i)
-print("---------------------------------------------")
+<<<<<<< HEAD
 d.hedgesToSegments()
+d.computeVertexVisibility()
+#d.horizontalSweep()
+#d.renameFaces()
+=======
+for i in d.eventList:
+    print(i[0].origin.y, i)
+print("---------------------------------------------")
 
 d.horizontalSweep()
 
 print("-------------HORIZONTAL FACES-----------")
 d.renameFaces()
+>>>>>>> 31bb0232ebb7373f0d334f4dc75f3a9de2a357a0
 
 print("-------------HORIZONTAL DONE------------")
 
@@ -73,8 +81,8 @@ if pydcel.io.DAT_FLAG_DOE:
 
     print("-------------VERTICAL EVENTLIST------------")
     d.separateHedges('v')
-    #for i in d.eventList:
-        #print(i[0].origin.y, i)
+    for i in d.eventList:
+        print(i[0].origin.y, i)
     print("-------------------------------------------")
 
     d.verticalSweep()
@@ -82,9 +90,6 @@ if pydcel.io.DAT_FLAG_DOE:
     d.renameFaces()
 
 print("-------------VERTICAL DONE------------")
-d.computeVertexVisibility()
-d.computeFaceVisibility()
-print(d.faceVisibility)
 
 GUI = pydcel.dcelVis(d)
 GUI.mainloop()
