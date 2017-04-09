@@ -1,5 +1,6 @@
 class draw(object):
-    """Convenience wrappers around tkinter drawing function to take care of coordinate transformations and other things.
+    """Convenience wrappers around tkinter drawing function to take care
+    of coordinate transformations and other things.
     Assumes master to have a t() function and a canvas attribute"""
     def __init__(self, master):
         self.m = master

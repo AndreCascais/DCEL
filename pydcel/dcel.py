@@ -9,19 +9,19 @@ Point = namedtuple('Point', ['x', 'y'])
 
 
 class vertex(object):
-    
+
     def __init__(self, px, py, identifier):
         self.identifier = identifier
         self.x = px
         self.y = py
         self.incidentEdge = None
-        
+
     def setTopology(self, newIncedentEdge):
         self.incidentEdge = newIncedentEdge
-        
+
     def p(self):
         return self.x, self.y
-    
+
     def toPoint(self):
         return Point(self.x, self.y)
 
@@ -30,7 +30,7 @@ class vertex(object):
 
 
 class hedge(object):
-    
+
     def __init__(self, identifier):
         self.identifier = identifier
         self.origin = None
@@ -45,7 +45,7 @@ class hedge(object):
         self.incidentFace = newIncindentFace
         self.next = newNext
         self.previous = newPrevious
-        
+
     def loop(self):
         """Loop from this hedge to the next ones. Stops when we are at the current one again."""
         yield self
@@ -53,7 +53,7 @@ class hedge(object):
         while e is not self:
             yield e
             e = e.next
-            
+
     def wind(self):
         """iterate over hedges emerging from vertex at origin in ccw order"""
         yield self
@@ -74,7 +74,7 @@ class hedge(object):
             return 'd'
         elif self.origin.y < self.next.origin.y:
             return 'u'
-        
+
     def findIntersection(self, vertex):
         # Check whether self is horizontal or vertical
         if self.origin.y == self.next.origin.y:  # self is horizontal
@@ -84,7 +84,7 @@ class hedge(object):
             x = self.origin.x
             y = vertex.y
         return Point(x, y)
-    
+
     def isTwinBlocking(self, direction):
         if direction == 'u':  # if i go left my twin goes right and is above me -> blocks
             return self.getDirection() == 'l'
@@ -98,7 +98,7 @@ class hedge(object):
 
 
 class face(object):
-    
+
     def __init__(self, identifier):
         self.identifier = identifier
         self.outerComponent = None
@@ -108,7 +108,7 @@ class face(object):
     def setTopology(self, newOuterComponent, newInnerComponent=None):
         self.outerComponent = newOuterComponent
         self.innerComponent = newInnerComponent
-        
+
     def loopOuterVertices(self):
         for e in self.outerComponent.loop():
             yield e.origin
@@ -118,7 +118,7 @@ class face(object):
 
 
 class DCEL(object):
-    
+
     def __init__(self):
         self.vertexList = []
         self.hedgeList = []
@@ -129,7 +129,7 @@ class DCEL(object):
         self.segmentList = SegmentList()
         self.vertexVisibility = None
         self.faceVisibility = None
-        
+
     def computeVertexVisibility(self):
         dim = len(self.vertexList)
         self.vertexVisibility = np.zeros((dim, dim))
@@ -138,7 +138,7 @@ class DCEL(object):
                 segment = Segment(self.vertexList[i].toPoint(), self.vertexList[j].toPoint())
                 if not self.segmentList.canIntersect(segment):
                     self.vertexVisibility[i, j] = 1
-        
+
     def hedgesToSegments(self):
         for i in self.eventList:
             for j in i:
@@ -161,19 +161,19 @@ class DCEL(object):
                         break
                 if flag_visible:
                     self.faceVisibility[i, j] = 1
-                    
+
     def printMatrix(self):
         n_vertex = len(self.vertexList)
         n_faces = len(self.faceList)  # Infinite face doesnt count
-        print ("param nG := 1;")
-        print ("param nV := {};".format(n_vertex))
-        print ("param nF := {};".format(n_faces))
-        print ("param : M : visible:=")
+        print("param nG := 1;")
+        print("param nV := {};".format(n_vertex))
+        print("param nF := {};".format(n_faces))
+        print("param : M : visible:=")
         for i in range(n_vertex):
             for j in range(n_faces):
                 if self.faceVisibility[i, j] == 1:
                     print("{} {} 1".format(i, j))
-        print ("end;")
+        print("end;")
 
     def getNewId(self, a_list):
         if len(a_list) == 0:
@@ -185,15 +185,15 @@ class DCEL(object):
         identifier = self.getNewId(self.vertexList)
         v = vertex(px, py, identifier)
         self.vertexList.append(v)
-        self.vertexSet.add(Point(px,py))
+        self.vertexSet.add(Point(px, py))
         return v
-        
+
     def createHedge(self):
         identifier = self.getNewId(self.hedgeList)
         e = hedge(identifier)
         self.hedgeList.append(e)
         return e
-        
+
     def createFace(self):
         identifier = self.getNewId(self.faceList)
         f = face(identifier)
@@ -245,6 +245,8 @@ class DCEL(object):
 
                     copy_of_edge_list.remove(current_edge)
                     current_edge = current_edge.next
+            else:
+                self.infiniteFace.vertexList.append(some_initial_edge)
 
     def separateHedges(self, direction):
         """
@@ -522,7 +524,7 @@ class DCEL(object):
 
                         tmp_hedge = hedge
                         while True:
-                            
+
                             up_hedge = sweeping_line.ceiling_item(hedge.origin.y + 1)[1][-1]
 
                             # going up -> hedge must go left

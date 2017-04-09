@@ -3,6 +3,7 @@ from . import dcel
 GRID_PARTITION_FLAG = False
 VISIBILITY_FLAG = False
 
+
 def ply2datadict(infile):
     """collect vertex coordinates from input file"""
     datadict = {'coords': [], 'faces': []}

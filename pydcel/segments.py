@@ -3,7 +3,7 @@ class Segment:
     def __init__(self, src, dest):
         self.src = src
         self.dest = dest
-        
+
     def intersectsWith(self, seg):
         if self.src == seg.src or self.src == seg.dest or self.dest == seg.src or self.dest == seg.dest:  # Intersection will be a single point
             return False
@@ -23,7 +23,7 @@ class SegmentList:
 
     def __init__(self):
         self.list = []
-        
+
     def addSegment(self, seg):
         self.list.append(seg)
 
