@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 from bintrees import AVLTree
 import copy
-from segments import *
+from .segments import *
 from collections import namedtuple
 
 Point = namedtuple('Point', ['x', 'y'])
