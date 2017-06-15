@@ -61,7 +61,7 @@ def datadict2dcel(datadict):
         for _ in face:
             polygon.createHedge()
 
-        for index in range(len(face)):
+        for index, _ in enumerate(face):
 
             polygon.hedgeList[offset + index].setTopology(polygon.vertexList[face[index]], polygon.hedgeList[offset + n_vertex_in_face + index], int_face, polygon.hedgeList[offset + (index + 1) % n_vertex_in_face], polygon.hedgeList[offset + (index - 1) % n_vertex_in_face])
 

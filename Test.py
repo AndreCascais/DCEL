@@ -1,18 +1,17 @@
-import pydcel
 import sys
 import readline
 from os import listdir
-import numpy as np
+import pydcel
 
 try:
-    input = raw_input
+    compat_input = raw_input
 except NameError:
-    pass
+    compat_input = input
 
 file_list = listdir("sampledata")
 
+
 class SimpleCompleter(object):
-    
     def __init__(self, options):
         self.options = sorted(options)
         return
@@ -22,12 +21,12 @@ class SimpleCompleter(object):
         if state == 0:
             # This is the first time for this text, so build a match list.
             if text:
-                self.matches = [s 
+                self.matches = [s
                                 for s in self.options
                                 if s and s.startswith(text)]
             else:
                 self.matches = self.options[:]
-        
+
         # Return the state'th item from the match list,
         # if we have that many.
         try:
@@ -36,12 +35,12 @@ class SimpleCompleter(object):
             response = None
         return response
 
+
 # Register our completer function
 readline.set_completer(SimpleCompleter(file_list).complete)
 
 # Use the tab key for completion
 readline.parse_and_bind('tab: complete')
-
 
 if len(sys.argv) == 2:
     chosen_file = sys.argv[1]
@@ -51,8 +50,8 @@ else:
         print(f)
     print("")
 
-    chosen_file = input("which file do you want: ",)
-    
+    chosen_file = compat_input("which file do you want: ", )
+
 d = pydcel.io.ply2dcel("sampledata/" + str(chosen_file))
 d.separateHedges('h')
 d.hedgesToSegments()
@@ -65,7 +64,7 @@ if pydcel.io.GRID_PARTITION_FLAG:
     d.renameFaces()
 
 print("-------------VERTICAL DONE------------")
-if (pydcel.io.VISIBILITY_FLAG):
+if pydcel.io.VISIBILITY_FLAG:
     d.computeVertexVisibility()
     d.computeFaceVisibility()
     d.printMatrix()

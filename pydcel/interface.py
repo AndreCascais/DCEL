@@ -1,9 +1,9 @@
 from __future__ import print_function
-import numpy as np
+
 import math
 
-from .vector import vec2
 from .interface_draw import draw
+from .vector import vec2
 
 try:
     from Tkinter import *
@@ -26,8 +26,8 @@ f - iterate through faces
 class dcelVis(Tk):
     def __init__(self, dcel):
         Tk.__init__(self)
-        self.sizex = 700
-        self.sizey = 700
+        self.sizex = 1000
+        self.sizey = 1000
         self.window_diagonal = math.sqrt(self.sizex ** 2 + self.sizey ** 2)
         self.title("DCELvis")
         self.resizable(0, 0)
@@ -250,7 +250,6 @@ class dcelVis(Tk):
             options = {'fill': '#eeeeee', 'outline': ''}
         vlist = [(v.x, v.y) for v in f.loopOuterVertices()]
         return self.draw.polygon(vlist, **options)
-
 
     def exit(self, event):
         print("bye bye.")
