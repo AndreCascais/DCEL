@@ -30,7 +30,7 @@ def ply2datadict(infile):
             for _ in range(holecount):
                 hole_vertex_count = int(f.readline())
                 vertexcount += hole_vertex_count
-                for j in range(hole_vertex_count):
+                for _ in range(hole_vertex_count):
                     line = f.readline()
                     x, y = line.split()
                     datadict['coords'].append([float(x), float(y)])
