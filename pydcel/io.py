@@ -18,7 +18,7 @@ def ply2datadict(infile):
             global VISIBILITY_FLAG
             VISIBILITY_FLAG = True
         vertexcount = int(f.readline())
-        for i in range(vertexcount):
+        for _ in range(vertexcount):
             line = f.readline()
             x, y = line.split()
             datadict['coords'].append([float(x), float(y)])
@@ -27,7 +27,7 @@ def ply2datadict(infile):
 
         holecount = int(f.readline())
         if holecount != 0:
-            for i in range(holecount):
+            for _ in range(holecount):
                 hole_vertex_count = int(f.readline())
                 vertexcount += hole_vertex_count
                 for j in range(hole_vertex_count):
@@ -40,7 +40,7 @@ def ply2datadict(infile):
 
 
 def datadict2dcel(datadict):
-
+    
     polygon = dcel.DCEL()
     int_face = polygon.createFace()
     inf_face = polygon.createInfFace()
