@@ -23,6 +23,10 @@ f - iterate through faces
 """
 
 
+def print_help():
+    print(HELP)
+
+
 class dcelVis(Tk):
     def __init__(self, dcel):
         Tk.__init__(self)
@@ -35,7 +39,7 @@ class dcelVis(Tk):
         self.bind('<Motion>', self.coords)
 
         self.bind('q', self.exit)
-        self.bind('h', self.print_help)
+        self.bind('h', print_help)
         self.bind('p', self.print_dcel)
 
         self.bind('e', self.iteratehedge)
@@ -76,9 +80,6 @@ class dcelVis(Tk):
         x = (x - self.tx) / self.scale
         y = (self.sizey - y - self.ty) / self.scale
         return int(round(x)), int(round(y))
-
-    def print_help(self):
-        print(HELP)
 
     def print_dcel(self):
         print(self.D)

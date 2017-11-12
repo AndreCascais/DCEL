@@ -117,6 +117,13 @@ class face(object):
         return "f{}".format(self.identifier)
 
 
+def getNewId(a_list):
+    if len(a_list) == 0:
+        return 0
+    else:
+        return a_list[-1].identifier + 1
+
+
 class DCEL(object):
 
     def __init__(self):
@@ -175,27 +182,21 @@ class DCEL(object):
                     print("{} {} 1".format(i, j))
         print("end;")
 
-    def getNewId(self, a_list):
-        if len(a_list) == 0:
-            return 0
-        else:
-            return a_list[-1].identifier + 1
-
     def createVertex(self, px, py):
-        identifier = self.getNewId(self.vertexList)
+        identifier = getNewId(self.vertexList)
         v = vertex(px, py, identifier)
         self.vertexList.append(v)
         self.vertexSet.add(Point(px, py))
         return v
 
     def createHedge(self):
-        identifier = self.getNewId(self.hedgeList)
+        identifier = getNewId(self.hedgeList)
         e = hedge(identifier)
         self.hedgeList.append(e)
         return e
 
     def createFace(self):
-        identifier = self.getNewId(self.faceList)
+        identifier = getNewId(self.faceList)
         f = face(identifier)
         self.faceList.append(f)
         return f
