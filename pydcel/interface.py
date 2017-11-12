@@ -125,38 +125,38 @@ class dcelVis(Tk):
 
     def iteratehedge(self, event):
         try:
-            self.hedge_it.next()
+            next(self.hedge_it)
         except StopIteration:
             self.hedge_it = self.type_iterator('hedge')
-            self.hedge_it.next()
+            next(self.hedge_it)
 
     def iterateface(self, event):
         try:
-            self.face_it.next()
+            next(self.face_it)
         except StopIteration:
             self.face_it = self.type_iterator('face')
-            self.face_it.next()
+            next(self.face_it)
 
     def iteratevertex(self, event):
         try:
-            self.vertex_it.next()
+            next(self.vertex_it)
         except StopIteration:
             self.vertex_it = self.type_iterator('vertex')
-            self.vertex_it.next()
+            next(self.vertex_it)
 
     def iteratetwin(self, event):
         try:
-            self.hedge_it.next()
+            next(self.hedge_it)
         except StopIteration:
             self.hedge_it = self.type_iterator('twin')
-            self.hedge_it.next()
+            next(self.hedge_it)
 
     def iterateprev(self, event):
         try:
-            self.hedge_it.next()
+            next(self.hedge_it)
         except StopIteration:
             self.hedge_it = self.type_iterator('prev')
-            self.hedge_it.next()
+            next(self.hedge_it)
 
     def type_iterator(self, q):
         if q == 'hedge':
