@@ -77,10 +77,10 @@ class dcelVis(Tk):
         y = (self.sizey - y - self.ty) / self.scale
         return int(round(x)), int(round(y))
 
-    def print_help(self, event):
+    def print_help(self):
         print(HELP)
 
-    def print_dcel(self, event):
+    def print_dcel(self):
         print(self.D)
 
     def bind_dcel(self, dcel):
@@ -123,35 +123,35 @@ class dcelVis(Tk):
         self.face_it = self.type_iterator('face')
         self.vertex_it = self.type_iterator('vertex')
 
-    def iteratehedge(self, event):
+    def iteratehedge(self):
         try:
             next(self.hedge_it)
         except StopIteration:
             self.hedge_it = self.type_iterator('hedge')
             next(self.hedge_it)
 
-    def iterateface(self, event):
+    def iterateface(self):
         try:
             next(self.face_it)
         except StopIteration:
             self.face_it = self.type_iterator('face')
             next(self.face_it)
 
-    def iteratevertex(self, event):
+    def iteratevertex(self):
         try:
             next(self.vertex_it)
         except StopIteration:
             self.vertex_it = self.type_iterator('vertex')
             next(self.vertex_it)
 
-    def iteratetwin(self, event):
+    def iteratetwin(self):
         try:
             next(self.hedge_it)
         except StopIteration:
             self.hedge_it = self.type_iterator('twin')
             next(self.hedge_it)
 
-    def iterateprev(self, event):
+    def iterateprev(self):
         try:
             next(self.hedge_it)
         except StopIteration:
@@ -251,7 +251,7 @@ class dcelVis(Tk):
         vlist = [(v.x, v.y) for v in f.loopOuterVertices()]
         return self.draw.polygon(vlist, **options)
 
-    def exit(self, event):
+    def exit(self):
         print("bye bye.")
         self.quit()
         self.destroy()

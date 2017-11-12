@@ -40,7 +40,6 @@ def ply2datadict(infile):
 
 
 def datadict2dcel(datadict):
-    
     polygon = dcel.DCEL()
     int_face = polygon.createFace()
     inf_face = polygon.createInfFace()
@@ -62,12 +61,18 @@ def datadict2dcel(datadict):
             polygon.createHedge()
 
         for index, _ in enumerate(face):
-
-            polygon.hedgeList[offset + index].setTopology(polygon.vertexList[face[index]], polygon.hedgeList[offset + n_vertex_in_face + index], int_face, polygon.hedgeList[offset + (index + 1) % n_vertex_in_face], polygon.hedgeList[offset + (index - 1) % n_vertex_in_face])
+            polygon.hedgeList[offset + index].setTopology(polygon.vertexList[face[index]],
+                                                          polygon.hedgeList[offset + n_vertex_in_face + index],
+                                                          int_face,
+                                                          polygon.hedgeList[offset + (index + 1) % n_vertex_in_face],
+                                                          polygon.hedgeList[offset + (index - 1) % n_vertex_in_face])
 
             polygon.vertexList[face[index]].incidentEdge = polygon.hedgeList[offset + index]
 
-            polygon.hedgeList[offset + n_vertex_in_face + index].setTopology(polygon.vertexList[face[(index + 1) % n_vertex_in_face]], polygon.hedgeList[offset + index], inf_face, polygon.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face], polygon.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
+            polygon.hedgeList[offset + n_vertex_in_face + index].setTopology(
+                polygon.vertexList[face[(index + 1) % n_vertex_in_face]], polygon.hedgeList[offset + index], inf_face,
+                polygon.hedgeList[offset + n_vertex_in_face + (index - 1) % n_vertex_in_face],
+                polygon.hedgeList[offset + n_vertex_in_face + (index + 1) % n_vertex_in_face])
 
         offset += 2 * n_vertex_in_face
 
