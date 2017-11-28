@@ -42,7 +42,7 @@ readline.set_completer(SimpleCompleter(file_list).complete)
 # Use the tab key for completion
 readline.parse_and_bind('tab: complete')
 
-if len(sys.argv) == 2:
+if len(sys.argv) >= 2:
     chosen_file = sys.argv[1]
 
 else:
@@ -69,5 +69,8 @@ if pydcel.io.VISIBILITY_FLAG:
     d.computeFaceVisibility()
     d.printMatrix()
 
-GUI = pydcel.dcelVis(d)
-GUI.mainloop()
+if len(sys.argv) == 3 and sys.argv[2] == "GUI":
+    GUI = pydcel.dcelVis(d)
+    GUI.mainloop()
+else:
+    print("Bye!")

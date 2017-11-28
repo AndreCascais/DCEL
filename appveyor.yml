@@ -1,0 +1,15 @@
+build: off
+
+environment:
+  matrix:
+  - PYTHON: C:\Python35-x64
+  - PYTHON: C:\Python36-x64
+
+init:
+  - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - python --version
+
+test_script:
+  - pip install -r requirements.txt
+  - python Teste.py gigante.ply
