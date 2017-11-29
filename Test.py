@@ -1,5 +1,8 @@
 import sys
-import readline
+try:
+  import readline
+except ImportError:
+  import pyreadline as readline
 from os import listdir
 import pydcel
 
