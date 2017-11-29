@@ -18,3 +18,9 @@ matrix:
     python: pypy3
   - os: osx
     osx_image: xcode9.2
+    language: generic
+    before_install:
+      - brew update
+      - brew install python3
+      - virtualenv env -p python3
+      - source env/bin/activate
