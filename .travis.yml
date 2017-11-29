@@ -1,11 +1,12 @@
 language: python
 dist: trusty
 sudo: false
-osx_image: xcode9.2
 
 script:
   - python --version
-  - python Test.py gigante.ply
+  - python Test.py big.ply
+  - python Test.py bigger.ply
+  - python Test.py biggest.ply
 
 matrix:
   include:
@@ -16,3 +17,4 @@ matrix:
   - os: linux
     python: pypy3
   - os: osx
+    osx_image: xcode9.2

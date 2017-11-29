@@ -12,4 +12,6 @@ init:
 
 test_script:
   - pip install -r requirements.txt
-  - python Test.py gigante.ply
+  - python Test.py big.ply
+  - python Test.py bigger.ply
+  - python Test.py biggest.ply
