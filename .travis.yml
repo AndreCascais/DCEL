@@ -3,9 +3,9 @@ language: python
 python:
   - 3.6
   - nightly
-script:
-  - python3 Teste.py gigante.ply
 
+script:
+  - python3 Test.py gigante.ply
 
 matrix:
   include:

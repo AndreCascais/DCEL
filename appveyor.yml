@@ -12,4 +12,4 @@ init:
 
 test_script:
   - pip install -r requirements.txt
-  - python Teste.py gigante.ply
+  - python Test.py gigante.ply
