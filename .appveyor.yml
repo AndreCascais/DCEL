@@ -1,17 +1,27 @@
-build: off
+build: false
 
 environment:
   matrix:
   - PYTHON: C:\Python35-x64
   - PYTHON: C:\Python36-x64
+  - PYTHON: C:\Python37-x64
+  - PYTHON: C:\Python38-x64
 
 init:
   - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python --version
+  - pip --version
+
+before_build:
+  - pip3 install virtualenv
+  - virtualenv env
+  - env\Scripts\activate
+  - python --version
+  - pip --version
+  - pip install -r requirements.txt
 
 test_script:
-  - pip install -r requirements.txt
   - python Test.py big.ply
   - python Test.py bigger.ply
   - python Test.py biggest.ply
